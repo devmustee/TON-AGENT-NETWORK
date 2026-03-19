@@ -15,7 +15,7 @@ let liveAgents = [...CORE_AGENTS];
 
 // 🟢 TONCONNECT
 const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-    manifestUrl: 'https://raw.githubusercontent.com/ton-connect/demo-dapp/main/public/tonconnect-manifest.json',
+    manifestUrl: 'tonconnect-manifest.json',
     buttonRootId: 'ton-connect'
 });
 
