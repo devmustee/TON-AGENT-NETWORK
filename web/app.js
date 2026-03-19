@@ -1,20 +1,39 @@
-let isWalletConnected = false;
-let userWalletAddress = "";
+/**
+ * 💎 TON AGENT NETWORK - PRO APP LOGIC
+ * Integrates Official TonConnect for Real Wallet Connectivity
+ */
 
 const AGENTS = [
-    { id: 'agentQuality', name: 'LogicMaster', price: 0.5, avatar: 'assets/logicmaster.png', bio: 'Premium deep-reasoning for complex architectures.', stats: '96% | 4.2s' },
-    { id: 'agentFast', name: 'QuickNet', price: 0.1, avatar: 'assets/quicknet.png', bio: 'High-speed summarizing. Optimized for speed.', stats: '88% | 0.8s' },
-    { id: 'agentCreative', name: 'SparkAI', price: 0.3, avatar: 'assets/sparkai.png', bio: 'Creative Perspective: Unique neural perspectives.', stats: '91% | 1.9s' }
+    { id: 'agentQuality', name: 'LogicMaster', price: 0.5, avatar: 'assets/logicmaster.png', bio: 'Premium deep-reasoning for complex architectures.', stats: '96% | 4.2s', devWallet: 'UQCFatxg0rLG4YU_uRgs9rKhnrrNrttYD3r5ru1TC2q6Zf9N', badge: 'PRO' },
+    { id: 'agentFast', name: 'QuickNet', price: 0.1, avatar: 'assets/quicknet.png', bio: 'High-speed summarizing. Optimized for speed.', stats: '88% | 0.8s', devWallet: 'UQBH-qC6Z_Y_q68n89YV7K8_Z8uRrrNrttYD3r5ru1TC2q6Zf', badge: 'FAST' },
+    { id: 'agentCreative', name: 'SparkAI', price: 0.3, avatar: 'assets/sparkai.png', bio: 'Creative Perspective: Unique neural perspectives.', stats: '91% | 1.9s', devWallet: 'UQDM-mD8t_L_8t88j88P8K8_P8uRrrNrttYD3r5ru1TC2q6Zp', badge: 'NEW' }
 ];
 
 const EMOJIS = ['🚀', '📈', '🧠', '⚡', '✨', '💎', '🔥', '✅', '🤖', '👑', '💸', '🎨', '🌟', '🛡️', '🛰️', '🪐', '💡', '🧪', '👾', '🌀', '🌊', '🌈', '🎉', '💥'];
 
+// 🟢 OFFICIAL TONCONNECT INTEGRATION
+const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+    manifestUrl: 'https://raw.githubusercontent.com/ton-connect/demo-dapp/main/public/tonconnect-manifest.json',
+    buttonRootId: 'ton-connect'
+});
+
+/**
+ * 🛠️ View Management
+ */
 function showView(viewName) {
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    
+    const bottomBar = document.getElementById('bottomChatBar');
+    bottomBar.style.display = (viewName === 'chat') ? 'flex' : 'none';
+
     if (viewName === 'market') {
         document.getElementById('tabMarket').classList.add('active');
         document.getElementById('viewMarket').classList.add('active');
+        renderMarketFeed();
+    } else if (viewName === 'chat') {
+        document.getElementById('tabChat').classList.add('active');
+        document.getElementById('viewChat').classList.add('active');
     } else {
         document.getElementById('tabRegister').classList.add('active');
         document.getElementById('viewRegister').classList.add('active');
@@ -22,19 +41,53 @@ function showView(viewName) {
 }
 
 /**
- * 🔐 WALLET CONNECT (TON)
- * Simulates a secure TON wallet connection (e.g. TonKeeper / TonConnect)
+ * 🛒 Marketplace Feed
  */
-function handleConnect() {
-    isWalletConnected = true;
-    userWalletAddress = "UQCFatxg0rLG4YU_uRgs9rKhnrrNrttYD3r5ru1TC2q6Zf9N"; // Simulated address
-    
-    const btn = document.getElementById('connectWallet');
-    btn.innerHTML = userWalletAddress.slice(0, 6) + "..." + userWalletAddress.slice(-4);
-    btn.style.background = "var(--tg-bubble-out)";
-    
-    appendMessage("✅ **Wallet Connected!** You can now interact with agents and unlock solutions directly via TON Mainnet.", "in");
-    alert(`🚀 TON Wallet Connected Successfully!\nAddress: ${userWalletAddress}`);
+function renderMarketFeed() {
+    const feed = document.getElementById('agentMarketFeed');
+    feed.innerHTML = '';
+    AGENTS.forEach(a => {
+        const card = document.createElement('div');
+        card.className = 'market-card';
+        card.innerHTML = `
+            <div class="card-badge">${a.badge}</div>
+            <img src="${a.avatar}" class="card-img" onerror="this.src='https://cdn-icons-png.flaticon.com/512/4712/4712035.png'">
+            <div class="card-info">
+                <h3>${a.name}</h3><p>${a.bio}</p>
+                <div class="card-meta"><span class="card-price">${a.price} TON</span><span class="card-stats">📈 ${a.stats}</span></div>
+                <button class="btn-unlock" onclick="startPaymentPrompt('${a.id}')">Hire Agent</button>
+            </div>`;
+        feed.appendChild(card);
+    });
+}
+
+function startPaymentPrompt(agentId) {
+    if (!tonConnectUI.connected) return tonConnectUI.openModal();
+    const agent = AGENTS.find(a => a.id === agentId);
+    handleTransaction(agent);
+}
+
+/**
+ * 💸 REAL TON TRANSACTION (Request Signature)
+ */
+async function handleTransaction(agent) {
+    const transaction = {
+        validUntil: Math.floor(Date.now() / 1000) + 60,
+        messages: [{
+            address: agent.devWallet,
+            amount: (agent.price * 1000000000).toString(),
+            payload: "" // Optional memo
+        }]
+    };
+
+    try {
+        const result = await tonConnectUI.sendTransaction(transaction);
+        appendMessage(`💸 **Transaction Sent!** Waiting for confirmation on TON Mainnet...`, "in");
+        console.log('Transaction Success:', result);
+    } catch (e) {
+        console.error('Transaction Failed:', e);
+        alert("Transaction Canceled or Wallet Error.");
+    }
 }
 
 function toggleModal(id, open = true) {
@@ -51,7 +104,7 @@ function renderEmojis() {
         item.className = 'emoji-item';
         item.innerText = e;
         item.onclick = () => {
-            if (!isWalletConnected) return alert("⚠️ Please connect your TON wallet first!");
+            if (!tonConnectUI.connected) return tonConnectUI.openModal();
             const input = document.getElementById('taskInput');
             input.value += e;
             toggleModal('emojiModal', false);
@@ -61,16 +114,10 @@ function renderEmojis() {
     });
 }
 
-function selectAttach(type) {
-    if (!isWalletConnected) return alert("⚠️ Please connect your TON wallet first!");
-    alert(`Attachment Mode: Select ${type}`);
-    toggleModal('attachModal', false);
-}
-
 function toggleSendBtn() {
     const input = document.getElementById('taskInput');
     const sendIcon = document.getElementById('sendBtnIcon');
-    sendIcon.style.color = input.value.trim().length > 0 ? '#50a7ea' : '#7e8c9a';
+    sendIcon.style.color = input.value.trim().length > 0 ? '#3390ec' : '#7e8c9a';
 }
 
 function appendMessage(text, type = 'in') {
@@ -83,11 +130,7 @@ function appendMessage(text, type = 'in') {
 }
 
 function sendMessage() {
-    if (!isWalletConnected) {
-        alert("⚠️ Connection Required: You must connect your TON wallet to interact with agents.");
-        return;
-    }
-
+    if (!tonConnectUI.connected) return tonConnectUI.openModal();
     const input = document.getElementById('taskInput');
     const text = input.value.trim();
     if (!text) return;
@@ -95,27 +138,24 @@ function sendMessage() {
     input.value = '';
     toggleSendBtn();
     setTimeout(() => {
-        appendMessage("🤖 Aggregating agent responses for your request...");
-        setTimeout(renderAgentWidget, 1000);
+        appendMessage("🌐 **Orchestrator Online.** Processing your request across the Network...");
+        setTimeout(renderAgentWidgetInChat, 1200);
     }, 500);
 }
 
-function renderAgentWidget() {
+function renderAgentWidgetInChat() {
     const widget = document.createElement('div');
     widget.className = 'agent-widget';
     AGENTS.forEach(a => {
         const row = document.createElement('div');
         row.className = 'agent-row';
-        row.onclick = () => startPayment(a.id, a.price);
+        row.onclick = () => handleTransaction(a);
         row.innerHTML = `
             <img src="${a.avatar}" class="agent-avatar-img">
             <div class="agent-body">
-                <div class="agent-header">
-                    <span class="name">${a.name}</span>
-                    <span class="price">${a.price} TON</span>
-                </div>
+                <div class="agent-header"><span class="name">${a.name}</span><span class="price">${a.price} TON</span></div>
                 <div class="preview">${a.bio}</div>
-                <div class="action-row"><span class="stats">📊 ${a.stats}</span><button class="btn-unlock">Unlock</button></div>
+                <div class="action-row"><span class="stats">📊 ${a.stats}</span><button class="btn-unlock">Unlock Solution</button></div>
             </div>`;
         widget.appendChild(row);
     });
@@ -123,31 +163,4 @@ function renderAgentWidget() {
     document.querySelector('.chat-viewport').scrollTop = document.querySelector('.chat-viewport').scrollHeight;
 }
 
-/**
- * ⚡ TRANSACTION SIGNING (TON)
- * Simulates a TON transfer transaction for an agent unlock.
- */
-function startPayment(agentId, amount) {
-    if (!isWalletConnected) return alert("⚠️ Please connect your wallet first!");
-    
-    const receivingAddress = "UQCFatxg0rLG4YU_uRgs9rKhnrrNrttYD3r5ru1TC2q6Zf9N";
-    
-    // Construct the TON Transfer Bridge Link (Simulated Signing Request)
-    const paymentLink = `ton://transfer/${receivingAddress}?amount=${amount * 1000000000}&text=Unlock_${agentId}`;
-    
-    alert(`💎 **TRANSACTION SIGNING** 💎\n\nRequesting signature to transfer ${amount} TON to ${receivingAddress}.\n(This includes the 5% platform commission)`);
-    
-    // In a real app, this would open TonConnect or TonKeeper for signing
-    console.log(`🚀 Transaction Initiated: ${paymentLink}`);
-    
-    setTimeout(() => {
-        appendMessage(`💸 **Transaction Signed!** Verifying ${amount} TON payment on TON Mainnet...`, "in");
-        setTimeout(() => {
-            appendMessage(`✅ **Payment Confirmed!** Agent solution unlocked for task reference: ${agentId}`, "in");
-        }, 1500);
-    }, 500);
-}
-
-document.getElementById('taskInput').addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') sendMessage();
-});
+window.onload = () => showView('market');
