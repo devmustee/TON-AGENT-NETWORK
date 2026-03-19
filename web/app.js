@@ -1,12 +1,21 @@
 /**
- * 🍱 TON AGENT NETWORK - REAL-TIME MARKETPLACE LOGIC
+ * 🍱 TON AGENT NETWORK - HYBRID MARKETPLACE 
+ * Logic to handle both Static Seeding and Real-Time Persistence
  */
 
 let isWalletConnected = false;
 let userWalletAddress = "";
-let liveAgents = []; // Fetched from the backend
 
-// 🟢 TONCONNECT - Real Wallet 
+// 🧱 DEFAULT CORE AGENTS (Fallback Seed)
+const CORE_AGENTS = [
+    { id: 'agentQuality', name: 'LogicMaster', price: 0.5, avatar: 'assets/logicmaster.png', bio: 'Premium deep-reasoning for complex architectures.', stats: '96% | 4.2s', devWallet: 'UQCFatxg0rLG4YU_uRgs9rKhnrrNrttYD3r5ru1TC2q6Zf9N', badge: 'PRO' },
+    { id: 'agentFast', name: 'QuickNet', price: 0.1, avatar: 'assets/quicknet.png', bio: 'High-speed summarizing. Optimized for speed.', stats: '88% | 0.8s', devWallet: 'UQBH-qC6Z_Y_q68n89YV7K8_Z8uRrrNrttYD3r5ru1TC2q6Zf', badge: 'FAST' },
+    { id: 'agentCreative', name: 'SparkAI', price: 0.3, avatar: 'assets/sparkai.png', bio: 'Creative Perspective: Unique neural perspectives.', stats: '91% | 1.9s', devWallet: 'UQDM-mD8t_L_8t88j88P8K8_P8uRrrNrttYD3r5ru1TC2q6Zp', badge: 'NEW' }
+];
+
+let liveAgents = [...CORE_AGENTS]; 
+
+// 🟢 TONCONNECT INTEGRATION
 const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
     manifestUrl: 'https://raw.githubusercontent.com/ton-connect/demo-dapp/main/public/tonconnect-manifest.json',
     buttonRootId: 'ton-connect'
@@ -25,7 +34,7 @@ function showView(viewName) {
     if (viewName === 'market') {
         document.getElementById('tabMarket').classList.add('active');
         document.getElementById('viewMarket').classList.add('active');
-        fetchAgents(); // Refresh the feed from the server
+        fetchAgents(); // Refresh the dynamic feed
     } else if (viewName === 'chat') {
         document.getElementById('tabChat').classList.add('active');
         document.getElementById('viewChat').classList.add('active');
@@ -36,15 +45,27 @@ function showView(viewName) {
 }
 
 /**
- * 🛒 MARKETPLACE: Fetch & Render Dynamic Agents
+ * 🛒 MARKETPLACE: Fetch Dynamic & Merge with Core
  */
 async function fetchAgents() {
     try {
         const res = await fetch('/api/agents');
-        liveAgents = await res.json();
+        const dbAgents = await res.json();
+        
+        // Merge DB agents with Core agents, avoiding duplicates
+        const allAgents = [...CORE_AGENTS];
+        dbAgents.forEach(dbA => {
+            if (!allAgents.find(a => a.id === dbA.id)) {
+                allAgents.push(dbA);
+            }
+        });
+        
+        liveAgents = allAgents;
         renderMarketFeed();
     } catch (e) {
-        console.error("Marketplace Offline", e);
+        console.warn("Using Offline Seed Core Agents.");
+        liveAgents = [...CORE_AGENTS];
+        renderMarketFeed();
     }
 }
 
@@ -52,25 +73,15 @@ function renderMarketFeed() {
     const feed = document.getElementById('agentMarketFeed');
     feed.innerHTML = '';
 
-    // If no agents yet, show a welcome message
-    if (liveAgents.length === 0) {
-        feed.innerHTML = `<div class="bubble in">Welcome, pioneer. No agents are registered yet. Be the first to build on our network!</div>`;
-        return;
-    }
-
     liveAgents.forEach(a => {
         const card = document.createElement('div');
         card.className = 'market-card';
         card.innerHTML = `
-            <div class="card-badge">${a.badge || 'PRO'}</div>
-            <img src="${a.avatar || 'assets/logo.png'}" class="card-img" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3662/3662817.png'">
+            <div class="card-badge">${a.badge || 'NEW'}</div>
+            <img src="${a.avatar || 'assets/logo.png'}" class="card-img" onerror="this.src='https://cdn-icons-png.flaticon.com/512/4712/4712035.png'">
             <div class="card-info">
-                <h3>${a.name}</h3>
-                <p>${a.bio || 'AI Specialisation for TON Mainnet.'}</p>
-                <div class="card-meta">
-                    <span class="card-price">${a.price} TON</span>
-                    <span class="card-stats">📈 ${a.stats || '100% | 0.8s'}</span>
-                </div>
+                <h3>${a.name}</h3><p>${a.bio || 'AI Specialization.'}</p>
+                <div class="card-meta"><span class="card-price">${a.price} TON</span><span class="card-stats">${a.stats || '100%'}</span></div>
                 <button class="btn-unlock" onclick="handleTransactionPrompt('${a.id}')">Hire Agent</button>
             </div>`;
         feed.appendChild(card);
@@ -78,7 +89,7 @@ function renderMarketFeed() {
 }
 
 /**
- * 🛠️ DEVELOPER PORTAL: Submit Real Agent
+ * 🛠️ REGISTER SUBMISSION
  */
 async function registerNewAgent() {
     const nameInput = document.getElementById('regName');
@@ -99,7 +110,7 @@ async function registerNewAgent() {
         devWallet: walletInput.value
     };
 
-    if (!agentPayload.name || !agentPayload.devWallet) return alert("⚠️ Please provide Name and TON Payout Address.");
+    if (!agentPayload.name || !agentPayload.devWallet) return alert("⚠️ Please provide at least Name and TON Payout wallet.");
 
     try {
         const res = await fetch('/api/agents', {
@@ -107,14 +118,13 @@ async function registerNewAgent() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(agentPayload)
         });
-        
         if (res.ok) {
-            alert("🚀 AGENT LIVE! Your integration is now visible in the Marketplace.");
+            alert("🚀 AGENT LIVE!");
             nameInput.value=''; avatarInput.value=''; bioInput.value=''; urlInput.value=''; keyInput.value=''; priceInput.value=''; walletInput.value='';
             showView('market');
         }
     } catch (e) {
-        alert("Server Offline. Local Simulation is active.");
+        alert("Server Offline. Submit via Production only.");
     }
 }
 
@@ -144,7 +154,6 @@ async function processPayment(agent) {
     }
 }
 
-// Messaging Logic
 function sendMessage() {
     if (!tonConnectUI.connected) return tonConnectUI.openModal();
     const input = document.getElementById('taskInput');
@@ -153,16 +162,12 @@ function sendMessage() {
     appendMessage(text, 'out');
     input.value = '';
     setTimeout(() => {
-        appendMessage("🌐 **Orchestrator Search.** Searching for specialized agents...");
-        setTimeout(() => {
-            appendMessage("✅ **Found Agents.** Competing responses are ready to be unlocked via TON payment.");
-            renderMarketFeedInChat();
-        }, 1200);
+        appendMessage("🌐 **Orchestrator Proxy Online.** Dispatching task to Network...");
+        setTimeout(renderAgentWidgetInChat, 1200);
     }, 500);
 }
 
-function renderMarketFeedInChat() {
-    const chatViewport = document.querySelector('.chat-viewport');
+function renderAgentWidgetInChat() {
     const widget = document.createElement('div');
     widget.className = 'agent-widget';
     liveAgents.forEach(a => {
@@ -178,8 +183,8 @@ function renderMarketFeedInChat() {
             </div>`;
         widget.appendChild(row);
     });
-    chatViewport.appendChild(widget);
-    chatViewport.scrollTop = chatViewport.scrollHeight;
+    document.querySelector('.chat-viewport').appendChild(widget);
+    document.querySelector('.chat-viewport').scrollTop = document.querySelector('.chat-viewport').scrollHeight;
 }
 
 function appendMessage(text, type = 'in') {
