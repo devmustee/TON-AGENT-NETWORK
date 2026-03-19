@@ -1,7 +1,10 @@
+let isWalletConnected = false;
+let userWalletAddress = "";
+
 const AGENTS = [
-    { id: 'agentQuality', name: 'LogicMaster', price: 0.5, avatar: '/Users/user/.gemini/antigravity/brain/94bbe715-35e0-45c2-826f-5dffc52640ec/logicmaster_agent_avatar_1773955787080.png', bio: 'Premium deep-reasoning for complex architectures.', stats: '96% | 4.2s' },
-    { id: 'agentFast', name: 'QuickNet', price: 0.1, avatar: '/Users/user/.gemini/antigravity/brain/94bbe715-35e0-45c2-826f-5dffc52640ec/quicknet_agent_avatar_1773955695322.png', bio: 'High-speed summarizing. Optimized for speed.', stats: '88% | 0.8s' },
-    { id: 'agentCreative', name: 'SparkAI', price: 0.3, avatar: '/Users/user/.gemini/antigravity/brain/94bbe715-35e0-45c2-826f-5dffc52640ec/sparkai_agent_avatar_icon_1773956124689.png', bio: 'Creative Perspective: Unique neural perspectives.', stats: '91% | 1.9s' }
+    { id: 'agentQuality', name: 'LogicMaster', price: 0.5, avatar: 'assets/logicmaster.png', bio: 'Premium deep-reasoning for complex architectures.', stats: '96% | 4.2s' },
+    { id: 'agentFast', name: 'QuickNet', price: 0.1, avatar: 'assets/quicknet.png', bio: 'High-speed summarizing. Optimized for speed.', stats: '88% | 0.8s' },
+    { id: 'agentCreative', name: 'SparkAI', price: 0.3, avatar: 'assets/sparkai.png', bio: 'Creative Perspective: Unique neural perspectives.', stats: '91% | 1.9s' }
 ];
 
 const EMOJIS = ['🚀', '📈', '🧠', '⚡', '✨', '💎', '🔥', '✅', '🤖', '👑', '💸', '🎨', '🌟', '🛡️', '🛰️', '🪐', '💡', '🧪', '👾', '🌀', '🌊', '🌈', '🎉', '💥'];
@@ -18,11 +21,20 @@ function showView(viewName) {
     }
 }
 
+/**
+ * 🔐 WALLET CONNECT (TON)
+ * Simulates a secure TON wallet connection (e.g. TonKeeper / TonConnect)
+ */
 function handleConnect() {
+    isWalletConnected = true;
+    userWalletAddress = "UQCFatxg0rLG4YU_uRgs9rKhnrrNrttYD3r5ru1TC2q6Zf9N"; // Simulated address
+    
     const btn = document.getElementById('connectWallet');
-    btn.innerHTML = "UQCF...2q6Zf9N";
-    btn.style.background = "#2b5278";
-    alert("🚀 TON Wallet Connected (UQCFatxg0rLG4YU_uRgs9rKhnrrNrttYD3r5ru1TC2q6Zf9N)");
+    btn.innerHTML = userWalletAddress.slice(0, 6) + "..." + userWalletAddress.slice(-4);
+    btn.style.background = "var(--tg-bubble-out)";
+    
+    appendMessage("✅ **Wallet Connected!** You can now interact with agents and unlock solutions directly via TON Mainnet.", "in");
+    alert(`🚀 TON Wallet Connected Successfully!\nAddress: ${userWalletAddress}`);
 }
 
 function toggleModal(id, open = true) {
@@ -39,6 +51,7 @@ function renderEmojis() {
         item.className = 'emoji-item';
         item.innerText = e;
         item.onclick = () => {
+            if (!isWalletConnected) return alert("⚠️ Please connect your TON wallet first!");
             const input = document.getElementById('taskInput');
             input.value += e;
             toggleModal('emojiModal', false);
@@ -49,6 +62,7 @@ function renderEmojis() {
 }
 
 function selectAttach(type) {
+    if (!isWalletConnected) return alert("⚠️ Please connect your TON wallet first!");
     alert(`Attachment Mode: Select ${type}`);
     toggleModal('attachModal', false);
 }
@@ -69,6 +83,11 @@ function appendMessage(text, type = 'in') {
 }
 
 function sendMessage() {
+    if (!isWalletConnected) {
+        alert("⚠️ Connection Required: You must connect your TON wallet to interact with agents.");
+        return;
+    }
+
     const input = document.getElementById('taskInput');
     const text = input.value.trim();
     if (!text) return;
@@ -104,8 +123,29 @@ function renderAgentWidget() {
     document.querySelector('.chat-viewport').scrollTop = document.querySelector('.chat-viewport').scrollHeight;
 }
 
-function startPayment(id, amount) {
-    alert(`Authorize ${amount} TON payment via TON Wallet for Unlock_${id}\n(Includes 5% Commission)`);
+/**
+ * ⚡ TRANSACTION SIGNING (TON)
+ * Simulates a TON transfer transaction for an agent unlock.
+ */
+function startPayment(agentId, amount) {
+    if (!isWalletConnected) return alert("⚠️ Please connect your wallet first!");
+    
+    const receivingAddress = "UQCFatxg0rLG4YU_uRgs9rKhnrrNrttYD3r5ru1TC2q6Zf9N";
+    
+    // Construct the TON Transfer Bridge Link (Simulated Signing Request)
+    const paymentLink = `ton://transfer/${receivingAddress}?amount=${amount * 1000000000}&text=Unlock_${agentId}`;
+    
+    alert(`💎 **TRANSACTION SIGNING** 💎\n\nRequesting signature to transfer ${amount} TON to ${receivingAddress}.\n(This includes the 5% platform commission)`);
+    
+    // In a real app, this would open TonConnect or TonKeeper for signing
+    console.log(`🚀 Transaction Initiated: ${paymentLink}`);
+    
+    setTimeout(() => {
+        appendMessage(`💸 **Transaction Signed!** Verifying ${amount} TON payment on TON Mainnet...`, "in");
+        setTimeout(() => {
+            appendMessage(`✅ **Payment Confirmed!** Agent solution unlocked for task reference: ${agentId}`, "in");
+        }, 1500);
+    }, 500);
 }
 
 document.getElementById('taskInput').addEventListener('keypress', (e) => {
