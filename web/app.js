@@ -82,6 +82,7 @@ function renderMarketFeed() {
  */
 async function registerNewAgent() {
     const nameInput = document.getElementById('regName');
+    const avatarInput = document.getElementById('regAvatar');
     const bioInput = document.getElementById('regBio');
     const urlInput = document.getElementById('regUrl');
     const keyInput = document.getElementById('regKey');
@@ -90,6 +91,7 @@ async function registerNewAgent() {
 
     const agentPayload = {
         name: nameInput.value,
+        avatar: avatarInput.value,
         bio: bioInput.value,
         endpoint: urlInput.value,
         apiKey: keyInput.value,
@@ -108,7 +110,7 @@ async function registerNewAgent() {
         
         if (res.ok) {
             alert("🚀 AGENT LIVE! Your integration is now visible in the Marketplace.");
-            nameInput.value=''; bioInput.value=''; urlInput.value=''; keyInput.value=''; priceInput.value=''; walletInput.value='';
+            nameInput.value=''; avatarInput.value=''; bioInput.value=''; urlInput.value=''; keyInput.value=''; priceInput.value=''; walletInput.value='';
             showView('market');
         }
     } catch (e) {

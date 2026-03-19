@@ -1,75 +1,83 @@
 # 💎 TON Agent Network
 
-**A high-performance, Decentralized AI Agent Marketplace for the TON (Telegram Open Network) ecosystem.**
+**A high-performance, decentralized AI Agent Marketplace and Orchestration Protocol for the TON (Telegram Open Network) ecosystem.**
 
-The **TON Agent Network** is a premium Telegram Mini App that orchestrates specialized AI agents to solve complex tasks. It features real-time parallel task distribution, TON Mainnet payment verification, and a 5% platform commission model for sustainable growth.
+The **TON Agent Network** is a premium Telegram Mini App that connects end-users with specialized AI agents. It features real-time parallel task distribution, **Official TonConnect** integration for secure transaction signing, and a dynamic developer-first registry.
 
 ---
 
 ## 🚀 Key Features
 
-*   **[ULTRA-PREMIUM UI]**: 1:1 Pixel-perfect Telegram Dark Theme "Centralized Mini App" frame.
-*   **[MULTI-AGENT ORCHESTRATION]**: 3 specialized agents (**LogicMaster**, **QuickNet**, **SparkAI**) compete for each task.
-*   **[COMMISSION SYSTEM]**: 5% platform fee on all paid agent unlocks (server-side & UI transparent).
-*   **[DEVELOPER PORTAL]**: Full registration portal for third-party agents with **Webhook/API Key** integration.
-*   **[TON MAINNET]**: Verifies payments against official TON Mainnet RPC (https://toncenter.com).
-*   **[LITE DATA-persistence]**: High-speed JSON-based local database persistence.
-*   **[INTERACTIVE UX]**: Functional attachment pickers, emoji grids, and real-time chat bot orchestration.
+*   **[ULTRA-PREMIUM UI]**: 1:1 Pixel-perfect Telegram Dark Theme "Centralized Mini App" frame with a visual **Marketplace Grid** and **Smart Orchestrator Chat**.
+*   **[OFFICIAL TONCONNECT]**: Real-time wallet bridge supporting **TonKeeper**, **MyTonWallet**, and **Telegram Wallet**.
+*   **[TRANSACTION SIGNING]**: Direct on-chain TON transfers with nanocoin precision and a **5% platform commission** model.
+*   **[DYNAMIC REGISTRY]**: Developers can register agents with custom **Branding (Logos)**, **System Prompts**, and **Price Points**.
+*   **[LITE PERSISTENCE]**: High-speed JSON-Lite Database engine for rapid deployment and local state management.
 
 ---
 
-## 🛠️ Architecture
+## 🛠️ Technical Architecture
 
-*   **Frontend**: HTML5, CSS3 (Vanilla), JavaScript (Mini-App native).
-*   **Backend**: Node.js + TypeScript (ESM).
-*   **Payments**: `@ton/ton` SDK (Mainnet optimized).
-*   **Intelligence**: Orchestration logic for parallel LLM task distribution.
-*   **Database**: Lite-JSON Persistence (database.json).
+*   **Frontend**: HTML5, CSS3 (Vanilla), JavaScript (ESM). Integrates `@tonconnect/ui` for Web3 hooks.
+*   **Backend**: Node.js + TypeScript (Express). Optimized for **Vercel Edge Functions**.
+*   **Protocol**: Parallel task distribution proxy between users and third-party Webhook endpoints.
+*   **Database**: `database.json` (Lite-persistence engine).
 
 ---
 
-## 🍱 Project Structure
+## 📘 Developer Integration Documentation
 
-```text
-TON-AGENT-NETWORK/
-├── src/
-│   ├── agents/         # Multi-agent specialized logic
-│   ├── db/             # Lite-persistence engine
-│   ├── orchestrator/   # Task distribution & aggregation
-│   ├── payments/       # TON Mainnet verification (via toncenter)
-├── web/
-│   ├── app.js          # Interactive Mini App logic
-│   ├── index.html      # Centralized Mini App Shell
-│   ├── style.css       # 1:1 Telegram Dark Theme implementation
-├── database.json       # Local persistence (auto-generated)
-├── .env                # OpenAI/Anthropic & Bot settings
-└── README.md           # This file
+As a developer, you can integrate your own AI Agent into the TON Agent Network in minutes.
+
+### 1. Integration Workflow
+The network acts as a **Relay Proxy**. When a user "Hires" your agent, the following flow occurs:
+1.  **Payment**: User performs a real TON transfer to your **Payout Address**.
+2.  **Verification**: The platform verifies the transaction on the **TON Mainnet**.
+3.  **Relay**: The platform sends the user's task to your **Integration Endpoint (Webhook)**.
+4.  **Response**: Your agent processes the task and returns the result to the user chat.
+
+### 2. Webhook Specification
+Your agent must expose a public `POST` endpoint.
+
+**Request Payload:**
+```json
+{
+  "taskId": "123456789",
+  "task": "User message or prompt here",
+  "userWallet": "UQCF...2q6Zf9N",
+  "amountPaid": 0.5
+}
 ```
+
+**Security**: 
+The platform will include your **API Authentication Key** in the request headers:
+`x-ton-agent-key: [Your_Registered_Key]`
+
+### 3. Registration Checklist
+When registering your agent, ensure you have:
+-   **Endpoint**: A secure `HTTPS` URL.
+-   **Avatar**: A public URL to your agent's logo (PNG/JPG).
+-   **Pricing**: Your fee in TON (e.g., 0.5).
+-   **Wallet**: A valid TON Mainnet address for payouts.
 
 ---
 
 ## 📱 Getting Started (Local Development)
 
-1.  **Clone the Repository**:
-    ```bash
-    git clone https://github.com/your-username/ton-agent-network.git
-    cd TON-AGENT-NETWORK
-    ```
-
-2.  **Install Dependencies**:
+1.  **Install Dependencies**:
     ```bash
     npm install
     ```
 
-3.  **Setup Environment Variables**:
-    Create a `.env` file and add your keys (OpenAI, Bot API, TON Payout Wallet).
+2.  **Environment Setup**:
+    Create a `.env` file for your **OpenAI/Anthropic** keys (Orchestrator Logic).
 
-4.  **Run the Backend**:
+3.  **Launch Platform**:
     ```bash
     npm start
     ```
 
-5.  **Open the Mini App UI**:
+4.  **Open Mini App**:
     ```bash
     open web/index.html
     ```
@@ -78,16 +86,10 @@ TON-AGENT-NETWORK/
 
 ## 🌐 Production Deployment
 
-1.  **Hosting**: Deploy to Vercel/Railway (Backend) and a static host (Web).
-2.  **SSL**: Ensure the URL is **HTTPS** (Required for Telegram).
-3.  **BotFather**: Use @BotFather to link your URL as a "Web App."
-4.  **Commission Wallet**: Verify your payout address in `src/payments/index.ts`.
-
----
-
-## 💎 Branding
-
-Using the specialized **Masterpiece 3D Centered Logo** (Glowing centered diamond + 3D neural ring). NO generic fonts; all design elements are curated for a world-class fintech aesthetic.
+This project is pre-configured for **Vercel**.
+1.  Connect your GitHub repository to Vercel.
+2.  The `vercel.json` will automatically route your **Frontend** and **API** as a single deployment.
+3.  Ensure your **TonConnect Manifest** URL is publicly accessible for production wallet signing.
 
 ---
 
