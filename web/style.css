@@ -34,14 +34,17 @@ body {
 .mini-app-frame {
   width: 100%;
   max-width: 480px;
-  height: 100%;
+  height: 100vh;
+  height: -webkit-fill-available;
   background-color: var(--tg-bg);
   display: flex;
   flex-direction: column;
   position: relative;
-  overflow-y: auto;
+  overflow: hidden;
   box-shadow: 0 0 100px rgba(0, 0, 0, 0.8);
 }
+
+@media (max-width: 480px) { .mini-app-frame { height: 100vh; border-radius: 0; } }
 
 /* Header - COMPACT NATIVE */
 header {
@@ -156,7 +159,7 @@ header {
   display: none;
   overflow-y: auto;
   padding: 16px;
-  padding-bottom: 100px;
+  padding-bottom: 20px;
   -webkit-overflow-scrolling: touch;
 }
 
@@ -431,7 +434,10 @@ textarea {
   align-items: center;
   gap: 12px;
   padding: 0 12px;
+  padding-bottom: env(safe-area-inset-bottom);
   flex-shrink: 0;
+  position: sticky;
+  bottom: 0;
 }
 
 .bottom-bar i {
