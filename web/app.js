@@ -1,5 +1,5 @@
 /**
- * 🍱 TON AGENT NETWORK - TACTICAL MOBILE LOGIC
+ * 🍱 TON AGENT NETWORK - TACTICAL PRO LOGIC
  */
 
 let isWalletConnected = false;
@@ -11,7 +11,7 @@ const CORE_AGENTS = [
     { id: 'agentCreative', name: 'SparkAI', price: 0.3, avatar: 'assets/sparkai.png', bio: 'Creative Perspective: Unique neural perspectives.', stats: '91% | 1.9s', devWallet: 'UQDM-mD8t_L_8t88j88P8K8_P8uRrrNrttYD3r5ru1TC2q6Zp', badge: 'NEW' }
 ];
 
-let liveAgents = [...CORE_AGENTS];
+let liveAgents = [...CORE_AGENTS]; 
 
 // 🟢 TONCONNECT
 const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
@@ -19,10 +19,33 @@ const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
     buttonRootId: 'ton-connect'
 });
 
+/**
+ * 🛠️ UI HELPERS
+ */
+function toggleModal(id, force) {
+    const el = document.getElementById(id);
+    if (force !== undefined) el.style.display = force ? 'block' : 'none';
+    else el.style.display = (el.style.display === 'block') ? 'none' : 'block';
+}
+
+function toggleSendBtn() {
+    const input = document.getElementById('taskInput');
+    const icon = document.getElementById('sendBtnIcon');
+    icon.style.color = input.value.trim() ? '#3390ec' : '#7e8c9a';
+}
+
+function selectAttach(type) {
+    toggleModal('attachModal', false);
+    appendMessage(`📎 Attached ${type}. Ready for tasking.`, 'out');
+}
+
+/**
+ * 🛠️ VIEW MANAGEMENT
+ */
 function showView(viewName) {
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-
+    
     document.getElementById('bottomChatBar').style.display = (viewName === 'chat') ? 'flex' : 'none';
 
     if (viewName === 'market') {
@@ -92,6 +115,7 @@ async function processPayment(agent) {
     };
     try {
         await tonConnectUI.sendTransaction(transaction);
+        appendMessage(`💸 Payment for **${agent.name}** confirmed via TonConnect.`, 'in');
     } catch (e) { alert("Canceled."); }
 }
 
@@ -125,6 +149,7 @@ function sendMessage() {
     if (!text) return;
     appendMessage(text, 'out');
     input.value = '';
+    toggleSendBtn(); 
     setTimeout(() => {
         appendMessage("🌐 Searching Network...");
         setTimeout(() => {
@@ -153,7 +178,7 @@ function renderAgentWidgetInChat() {
 }
 
 function appendMessage(text, type = 'in') {
-    const chatViewport = document.querySelector('.chat-viewport');
+    const chatViewport = document.getElementById('chatList');
     const msg = document.createElement('div');
     msg.className = `bubble ${type}`;
     msg.innerHTML = `${text} <span class="time">${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>`;
@@ -161,4 +186,17 @@ function appendMessage(text, type = 'in') {
     chatViewport.scrollTop = chatViewport.scrollHeight;
 }
 
-window.onload = () => showView('market');
+window.onload = () => {
+    showView('market');
+    const reacts = ['👍', '🏙️', '🔥', '👏', '🎨', '🚀', '🙌', '💎', '📍', '💯', '✨', '⚡'];
+    const grid = document.getElementById('emojiList');
+    reacts.forEach(r => {
+        const d = document.createElement('div');
+        d.className = 'agent-row';
+        d.style.justifyContent = 'center';
+        d.style.border = 'none';
+        d.innerHTML = r;
+        d.onclick = () => { appendMessage(r, 'out'); toggleModal('emojiModal', false); };
+        grid.appendChild(d);
+    });
+};
