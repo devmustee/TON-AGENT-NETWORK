@@ -15,7 +15,7 @@ let liveAgents = [...CORE_AGENTS];
 
 // 🟢 TONCONNECT
 const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-    manifestUrl: 'tonconnect-manifest.json',
+    manifestUrl: 'https://ton-agent-network.vercel.app/tonconnect-manifest.json',
     buttonRootId: 'ton-connect'
 });
 
