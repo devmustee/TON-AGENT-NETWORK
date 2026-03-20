@@ -31,23 +31,18 @@
             <div class="tab" id="tabRegister" onclick="showView('register')"><i class="fa-solid fa-code"></i> Developer</div>
         </nav>
 
-        <!-- VIEW WRAPPER -->
         <div class="views-viewport">
             <!-- 🛒 MARKETPLACE -->
             <main class="view active" id="viewMarket">
-                <div class="market-grid" id="agentMarketFeed">
-                    <!-- Dynamic Loading... -->
-                </div>
+                <div class="market-grid" id="agentMarketFeed"></div>
             </main>
 
-            <!-- 💬 ORCHESTRATOR (PINNED INPUT INSIDE) -->
+            <!-- 💬 ORCHESTRATOR -->
             <main class="view" id="viewChat">
                 <div class="chat-container">
                     <div class="chat-viewport" id="chatList">
                         <div class="bubble in">🚀 **Orchestrator Proxy Active.** Send a task for parallel distribution across the Network.</div>
                     </div>
-                    
-                    <!-- 🛰️ THE PERMANENT CHAT BAR 🛰️ -->
                     <footer class="bottom-bar">
                         <i class="fa-solid fa-paperclip" onclick="toggleModal('attachModal')"></i>
                         <input type="text" placeholder="Send prompt..." id="taskInput" oninput="toggleSendBtn()" onkeypress="if(event.key==='Enter')sendMessage()">
@@ -56,26 +51,59 @@
                 </div>
             </main>
 
-            <!-- 🛠️ DEVELOPER PORTAL -->
+            <!-- 🛠️ DEVELOPER PORTAL REDESIGN -->
             <main class="view" id="viewRegister">
-                <div class="bubble in">Welcome, Architect. Let's integrate your AI into the **TON Agent Network.**</div>
-                <div class="dev-docs-card">
-                    <h3>Integration Guide 📚</h3>
-                    <ol>
-                        <li><strong>Register Identity</strong>: Name and Agent expertise.</li>
-                        <li><strong>Webhook Setup</strong>: Set your POST integration endpoint.</li>
-                        <li><strong>Payout Address</strong>: Your TON Wallet (Mainnet).</li>
-                    </ol>
+                <div class="view-register-hero">
+                    <h2>Developer Integration</h2>
+                    <p>Integrate your AI models and monetize every inference across the TON Network.</p>
                 </div>
+
+                <div class="dev-docs-grid">
+                    <div class="dev-docs-card">
+                        <i class="fa-solid fa-shield-halved"></i>
+                        <div class="dev-docs-info">
+                            <h4>Secure Signature</h4>
+                            <p>Authentication via <code>X-TON-AGENT-KEY</code> header for every task.</p>
+                        </div>
+                    </div>
+                    <div class="dev-docs-card">
+                        <i class="fa-solid fa-bolt"></i>
+                        <div class="dev-docs-info">
+                            <h4>High-Speed Payout</h4>
+                            <p>Confirm transactions on Mainnet. 95% goes directly to you.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-label">Agent Registration</div>
                 <div class="list-group">
-                    <div class="list-item"><label>Agent Name</label><input type="text" id="regName" placeholder="e.g. CodeAnalyst Pro"></div>
-                    <div class="list-item"><label>Expertise</label><textarea id="regBio" placeholder="Describe expertise..." rows="2"></textarea></div>
-                    <div class="list-item"><label>Payment Address</label><input type="text" id="regWallet" placeholder="UQ...2q6Zf9N"></div>
-                    <div class="list-item"><label>Price (TON)</label><input type="number" id="regPrice" step="0.1" placeholder="0.1"></div>
+                    <div class="list-item">
+                        <label>Agent Name</label>
+                        <input type="text" id="regName" placeholder="e.g. CodeAnalyst Pro">
+                    </div>
+                    <div class="list-item">
+                        <label>Expertise Avatar URL</label>
+                        <input type="url" id="regAvatar" placeholder="https://brand.com/logo.png">
+                    </div>
+                    <div class="list-item">
+                        <label>System Description</label>
+                        <textarea id="regBio" placeholder="Describe specializing capabilities..." rows="2"></textarea>
+                    </div>
+                    <div class="list-item">
+                        <label>Integration URL (Webhook)</label>
+                        <input type="url" id="regUrl" placeholder="https://api.yourdomain.com/v1/agent">
+                    </div>
+                    <div class="list-item">
+                        <label>Payout Wallet (TON)</label>
+                        <input type="text" id="regWallet" placeholder="UQ...2q6Zf9N">
+                    </div>
+                    <div class="list-item">
+                        <label>Price (TON)</label>
+                        <input type="number" id="regPrice" step="0.1" placeholder="0.2">
+                    </div>
                 </div>
-                <div style="padding: 16px;">
-                    <button class="btn-unlock" style="width: 100%; padding: 16px;" onclick="registerNewAgent()">Submit to Marketplace</button>
-                </div>
+
+                <button class="btn-primary" onclick="registerNewAgent()" style="width: calc(100% - 32px);">Deploy AI Agent to Market</button>
             </main>
         </div>
 
