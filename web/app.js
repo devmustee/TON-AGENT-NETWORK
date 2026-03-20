@@ -1,6 +1,6 @@
 /**
- * 🍱 TON AGENT NETWORK - OFFICIAL PRODUCTION LOGIC
- * Fixes for: Hiring Payments (TonConnect) and Mobile Visibility (Send Bar)
+ * 🍱 TON AGENT NETWORK - PERMANENT MOBILE PRO LOGIC
+ * Corrects: Mobile Orchestrator Chat Bar Persistence
  */
 
 let isWalletConnected = false;
@@ -49,13 +49,6 @@ function showView(viewName) {
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
     
-    // 🔥 FORCE VISIBILITY FOR MOBILE SEND BAR
-    const bottomBar = document.getElementById('bottomChatBar');
-    if (bottomBar) {
-        bottomBar.style.display = (viewName === 'chat') ? 'flex' : 'none';
-        bottomBar.style.visibility = (viewName === 'chat') ? 'visible' : 'hidden';
-    }
-
     if (viewName === 'market') {
         document.getElementById('tabMarket').classList.add('active');
         document.getElementById('viewMarket').classList.add('active');
@@ -103,20 +96,16 @@ function renderMarketFeed() {
                 </div>
                 <p>${a.bio || 'AI Specialisation for TON Network.'}</p>
                 <div class="card-meta">
-                   <div class="card-stats">📈 ${a.stats || '100%'}</div>
-                   <button class="btn-unlock" onclick="handleTransactionPrompt('${a.id}')" id="hire-${a.id}">Hire</button>
+                   <button class="btn-unlock" onclick="handleTransactionPrompt('${a.id}')">Hire</button>
                 </div>
             </div>`;
         feed.appendChild(card);
     });
 }
 
-/**
- * 💸 TON PAYMENTS (HIRING)
- */
 function handleTransactionPrompt(agentId) {
     if (!tonConnectUI.connected) {
-        alert("Connect your TON Wallet first! 💎");
+        alert("Connect TON Wallet first! 💎");
         return tonConnectUI.openModal();
     }
     const agent = liveAgents.find(a => a.id === agentId);
@@ -124,53 +113,18 @@ function handleTransactionPrompt(agentId) {
 }
 
 async function processPayment(agent) {
-    const amountInNano = (agent.price * 1000000000).toString();
     const transaction = {
         validUntil: Math.floor(Date.now() / 1000) + 60,
-        messages: [{
-            address: agent.devWallet,
-            amount: amountInNano,
-            payload: "" 
-        }]
+        messages: [{ address: agent.devWallet, amount: (agent.price * 1000000000).toString(), payload: "" }]
     };
-    
     try {
-        const walletName = tonConnectUI.wallet ? tonConnectUI.wallet.device.appName : "Wallet";
-        alert(`💎 PAYING ${agent.name}: Confirm the ${agent.price} TON transfer in your ${walletName}.`);
-        
+        alert(`💎 PAYING ${agent.name}: Check your wallet for the signature.`);
         await tonConnectUI.sendTransaction(transaction);
-        alert(`✅ SUCCESS! ${agent.name} hired. Solution unlocked.`);
-        
-        if (typeof appendMessage === 'function') {
-            appendMessage(`💸 Payment for **${agent.name}** confirmed.`, 'in');
-        }
+        alert(`✅ SUCCESS! ${agent.name} hired.`);
+        appendMessage(`💸 Payment for **${agent.name}** confirmed.`, 'in');
     } catch (e) {
-        console.error("Payment Failed:", e);
-        alert("❌ Payment Failed: " + (e.message || "User canceled or insufficient funds."));
+        alert("❌ Payment Failed: " + (e.message || "User canceled."));
     }
-}
-
-async function registerNewAgent() {
-    const agentPayload = {
-        name: document.getElementById('regName').value,
-        avatar: document.getElementById('regAvatar').value,
-        bio: document.getElementById('regBio').value,
-        endpoint: document.getElementById('regUrl').value,
-        price: parseFloat(document.getElementById('regPrice').value) || 0.1,
-        devWallet: document.getElementById('regWallet').value
-    };
-    if (!agentPayload.name || !agentPayload.devWallet) return alert("⚠️ Name and Wallet Address required.");
-    try {
-        const res = await fetch('/api/agents', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(agentPayload)
-        });
-        if (res.ok) {
-            alert("🚀 AGENT LIVE!");
-            showView('market');
-        }
-    } catch (e) { alert("Registration failed."); }
 }
 
 function sendMessage() {
@@ -196,18 +150,18 @@ function renderAgentWidgetInChat() {
     liveAgents.forEach(a => {
         const row = document.createElement('div');
         row.className = 'agent-row';
-        row.onclick = () => processPayment(a); // Direct pay from chat
+        row.onclick = () => processPayment(a);
         row.innerHTML = `
             <img src="${a.avatar || 'assets/logo.png'}" class="agent-avatar-img">
             <span class="name">${a.name}</span>
             <span class="price">${a.price} TON</span>
-            <i class="fa-solid fa-chevron-right" style="font-size:0.7rem; color:var(--tg-text-muted);"></i>`;
+            <i class="fa-solid fa-chevron-right" style="font-size:0.7rem;"></i>`;
         widget.appendChild(row);
     });
-    const chatV = document.getElementById('chatList');
-    if (chatV) {
-        chatV.appendChild(widget);
-        chatV.scrollTop = chatV.scrollHeight;
+    const chatList = document.getElementById('chatList');
+    if (chatList) {
+        chatList.appendChild(widget);
+        chatList.scrollTop = chatList.scrollHeight;
     }
 }
 
@@ -221,18 +175,4 @@ function appendMessage(text, type = 'in') {
     chatList.scrollTop = chatList.scrollHeight;
 }
 
-window.onload = () => {
-    showView('market');
-    const reacts = ['👍', '🏙️', '🔥', '👏', '🎨', '🚀', '🙌', '💎', '📍', '💯', '✨', '⚡'];
-    const grid = document.getElementById('emojiList');
-    if (grid) {
-        reacts.forEach(r => {
-            const d = document.createElement('div');
-            d.innerHTML = r;
-            d.style.padding = '10px';
-            d.style.fontSize = '1.5rem';
-            d.onclick = () => { appendMessage(r, 'out'); toggleModal('emojiModal', false); };
-            grid.appendChild(d);
-        });
-    }
-};
+window.onload = () => showView('market');

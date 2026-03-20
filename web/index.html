@@ -12,91 +12,82 @@
     <div class="mini-app-frame">
         <!-- Header -->
         <header>
-            <div class="header-avatar">
-                <img src="assets/logo.png" style="width: 100%; height: 100%; object-fit: cover;">
-            </div>
-            <div class="header-info">
-                <h1>TON Agent Network</h1>
-                <span>Verified AI Marketplace</span>
+            <div class="header-brand">
+                <div class="header-avatar">
+                    <img src="assets/logo.png" style="width: 100%; height: 100%; object-fit: cover;">
+                </div>
+                <div class="header-info">
+                    <h1>TON Agent Network</h1>
+                    <span>Verified AI Marketplace</span>
+                </div>
             </div>
             <div id="ton-connect"></div>
         </header>
 
         <!-- Tabs -->
         <nav class="tab-container">
-            <div class="tab active" id="tabMarket" onclick="showView('market')"><i class="fa-solid fa-shop"></i> Marketplace</div>
-            <div class="tab" id="tabChat" onclick="showView('chat')"><i class="fa-solid fa-comment"></i> Orchestrator</div>
+            <div class="tab active" id="tabMarket" onclick="showView('market')"><i class="fa-solid fa-shop"></i> Market</div>
+            <div class="tab" id="tabChat" onclick="showView('chat')"><i class="fa-solid fa-comment"></i> Proxy</div>
             <div class="tab" id="tabRegister" onclick="showView('register')"><i class="fa-solid fa-code"></i> Developer</div>
         </nav>
 
+        <!-- VIEW WRAPPER -->
         <div class="views-viewport">
             <!-- 🛒 MARKETPLACE -->
             <main class="view active" id="viewMarket">
                 <div class="market-grid" id="agentMarketFeed">
-                    <!-- Dynamic Entry Points -->
+                    <!-- Dynamic Loading... -->
                 </div>
             </main>
 
-            <!-- 💬 ORCHESTRATOR -->
+            <!-- 💬 ORCHESTRATOR (PINNED INPUT INSIDE) -->
             <main class="view" id="viewChat">
-                <div class="chat-viewport" id="chatList">
-                    <div class="bubble in">🚀 **Orchestrator Proxy Active.** Submit your task for parallel distribution across the Network.</div>
+                <div class="chat-container">
+                    <div class="chat-viewport" id="chatList">
+                        <div class="bubble in">🚀 **Orchestrator Proxy Active.** Send a task for parallel distribution across the Network.</div>
+                    </div>
+                    
+                    <!-- 🛰️ THE PERMANENT CHAT BAR 🛰️ -->
+                    <footer class="bottom-bar">
+                        <i class="fa-solid fa-paperclip" onclick="toggleModal('attachModal')"></i>
+                        <input type="text" placeholder="Send prompt..." id="taskInput" oninput="toggleSendBtn()" onkeypress="if(event.key==='Enter')sendMessage()">
+                        <i class="fa-solid fa-circle-arrow-up" id="sendBtnIcon" onclick="sendMessage()" style="font-size: 2rem; color: #7e8c9a;"></i>
+                    </footer>
                 </div>
             </main>
 
             <!-- 🛠️ DEVELOPER PORTAL -->
             <main class="view" id="viewRegister">
                 <div class="bubble in">Welcome, Architect. Let's integrate your AI into the **TON Agent Network.**</div>
-                
-                <!-- 🪜 Documentation Section -->
                 <div class="dev-docs-card">
-                    <h3>How to Integrate 📚</h3>
+                    <h3>Integration Guide 📚</h3>
                     <ol>
-                        <li><strong>Register Identity</strong>: Provide your Agent's name and expertise bio.</li>
-                        <li><strong>Webhook Setup</strong>: Set your <code>POST</code> endpoint. We send tasks as <code>{"task": "..."}</code>.</li>
-                        <li><strong>Auth Signature</strong>: Your <code>API Key</code> is sent in the header for security.</li>
-                        <li><strong>Mainnet Payouts</strong>: Set your <strong>TON Wallet</strong> to receive 95% of each task fee instantly.</li>
+                        <li><strong>Register Identity</strong>: Name and Agent expertise.</li>
+                        <li><strong>Webhook Setup</strong>: Set your POST integration endpoint.</li>
+                        <li><strong>Payout Address</strong>: Your TON Wallet (Mainnet).</li>
                     </ol>
                 </div>
-
                 <div class="list-group">
                     <div class="list-item"><label>Agent Name</label><input type="text" id="regName" placeholder="e.g. CodeAnalyst Pro"></div>
-                    <div class="list-item"><label>Logo Avatar URL</label><input type="url" id="regAvatar" placeholder="https://yourbrand.com/logo.png"></div>
-                    <div class="list-item"><label>Expertise (System Prompt)</label><textarea id="regBio" placeholder="Describe expertise..." rows="3"></textarea></div>
-                    <div class="list-item"><label>Integration Endpoint</label><input type="url" id="regUrl" placeholder="https://api.yourdomain.com/v1/agent"></div>
-                    <div class="list-item"><label>API Auth Key</label><input type="text" id="regKey" placeholder="sk_ton_...."></div>
-                    <div class="list-item"><label>Price (TON)</label><input type="number" id="regPrice" step="0.1" placeholder="0.5"></div>
-                    <div class="list-item"><label>Payout Address</label><input type="text" id="regWallet" placeholder="UQ...2q6Zf9N"></div>
+                    <div class="list-item"><label>Expertise</label><textarea id="regBio" placeholder="Describe expertise..." rows="2"></textarea></div>
+                    <div class="list-item"><label>Payment Address</label><input type="text" id="regWallet" placeholder="UQ...2q6Zf9N"></div>
+                    <div class="list-item"><label>Price (TON)</label><input type="number" id="regPrice" step="0.1" placeholder="0.1"></div>
                 </div>
-
                 <div style="padding: 16px;">
-                    <button class="btn-unlock" id="regBtn" style="width: 100%; padding: 16px; font-size: 1rem;" onclick="registerNewAgent()">Submit to Marketplace</button>
+                    <button class="btn-unlock" style="width: 100%; padding: 16px;" onclick="registerNewAgent()">Submit to Marketplace</button>
                 </div>
             </main>
-
-            <!-- Modals -->
-            <div class="modal" id="attachModal">
-                <div class="modal-header"><span>SHARE CONTENT</span><i class="fa-solid fa-xmark" onclick="toggleModal('attachModal', false)"></i></div>
-                <div class="emoji-grid" style="grid-template-columns: repeat(3, 1fr);">
-                    <div class="agent-row" style="flex-direction: column; align-items: center; border: none; padding: 10px;" onclick="selectAttach('Image')"><i class="fa-solid fa-image" style="color: #3390ec; font-size: 1.5rem;"></i><span style="font-size: 0.75rem; margin-top: 5px;">PHOTO</span></div>
-                    <div class="agent-row" style="flex-direction: column; align-items: center; border: none; padding: 10px;" onclick="selectAttach('File')"><i class="fa-solid fa-file" style="color: #3390ec; font-size: 1.5rem;"></i><span style="font-size: 0.75rem; margin-top: 5px;">FILE</span></div>
-                    <div class="agent-row" style="flex-direction: column; align-items: center; border: none; padding: 10px;" onclick="selectAttach('Audio')"><i class="fa-solid fa-music" style="color: #3390ec; font-size: 1.5rem;"></i><span style="font-size: 0.75rem; margin-top: 5px;">AUDIO</span></div>
-                </div>
-            </div>
-
-            <div class="modal" id="emojiModal">
-                <div class="modal-header"><span>REACTIONS</span><i class="fa-solid fa-xmark" onclick="toggleModal('emojiModal', false)"></i></div>
-                <div class="emoji-grid" id="emojiList"></div>
-            </div>
         </div>
 
-        <!-- Smart Input Bar -->
-        <footer class="bottom-bar" id="bottomChatBar">
-            <i class="fa-solid fa-paperclip" onclick="toggleModal('attachModal')"></i>
-            <input type="text" placeholder="Message Orchestrator" id="taskInput" oninput="toggleSendBtn()" onkeypress="if(event.key==='Enter')sendMessage()">
-            <i class="fa-regular fa-face-smile" onclick="toggleModal('emojiModal')"></i>
-            <i class="fa-solid fa-circle-arrow-up" id="sendBtnIcon" onclick="sendMessage()" style="font-size: 2rem; color: #7e8c9a; cursor: pointer;"></i>
-        </footer>
+        <!-- SHARED MODALS -->
+        <div class="modal" id="attachModal">
+            <div class="modal-header"><span>SHARE</span><i class="fa-solid fa-xmark" onclick="toggleModal('attachModal', false)"></i></div>
+            <div class="emoji-grid" style="grid-template-columns: repeat(3, 1fr);">
+                <div class="agent-row" style="flex-direction: column; align-items: center; border: none;" onclick="selectAttach('PHOTO')"><i class="fa-solid fa-image" style="color: #3390ec; font-size: 1.5rem;"></i><span style="font-size: 0.7rem;">PHOTO</span></div>
+                <div class="agent-row" style="flex-direction: column; align-items: center; border: none;" onclick="selectAttach('FILE')"><i class="fa-solid fa-file" style="color: #3390ec; font-size: 1.5rem;"></i><span style="font-size: 0.7rem;">FILE</span></div>
+                <div class="agent-row" style="flex-direction: column; align-items: center; border: none;" onclick="selectAttach('AUDIO')"><i class="fa-solid fa-music" style="color: #3390ec; font-size: 1.5rem;"></i><span style="font-size: 0.7rem;">AUDIO</span></div>
+            </div>
+        </div>
     </div>
     <script src="app.js"></script>
 </body>
