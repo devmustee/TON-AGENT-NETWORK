@@ -39,7 +39,7 @@ body {
   display: flex;
   flex-direction: column;
   position: relative;
-  overflow: hidden;
+  overflow-y: auto;
   box-shadow: 0 0 100px rgba(0, 0, 0, 0.8);
 }
 
@@ -242,13 +242,14 @@ header {
   margin-bottom: 10px;
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
 .card-meta {
   display: flex;
-  items-center;
+  align-items: center;
   justify-content: space-between;
   margin-top: auto;
 }
@@ -449,6 +450,7 @@ textarea {
   font-size: 0.95rem;
   color: white;
   -webkit-appearance: none;
+  appearance: none;
 }
 
 .bottom-bar input:focus {
