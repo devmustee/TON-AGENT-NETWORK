@@ -430,14 +430,14 @@ textarea {
   height: 64px;
   background: var(--tg-header-bg);
   border-top: 1px solid var(--tg-border);
-  display: flex;
+  display: flex !important;
   align-items: center;
   gap: 12px;
   padding: 0 12px;
   padding-bottom: env(safe-area-inset-bottom);
   flex-shrink: 0;
-  position: sticky;
-  bottom: 0;
+  position: relative;
+  z-index: 500;
 }
 
 .bottom-bar i {
