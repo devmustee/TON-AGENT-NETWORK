@@ -114,9 +114,13 @@ async function processPayment(agent) {
         messages: [{ address: agent.devWallet, amount: (agent.price * 1000000000).toString(), payload: "" }]
     };
     try {
+        appendMessage(`💎 **Requesting signature...** Check your ${tonConnectUI.wallet.device.appName} wallet.`, 'in');
         await tonConnectUI.sendTransaction(transaction);
-        appendMessage(`💸 Payment for **${agent.name}** confirmed via TonConnect.`, 'in');
-    } catch (e) { alert("Canceled."); }
+        appendMessage(`💸 Payment for **${agent.name}** confirmed via TonConnect. Solution unlocked.`, 'in');
+    } catch (e) { 
+        console.error("TonConnect Error:", e);
+        appendMessage(`❌ **Payment Canceled.** ${e.message || "Transaction rejected at wallet."}`, "in");
+    }
 }
 
 async function registerNewAgent() {
