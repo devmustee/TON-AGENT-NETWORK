@@ -1,6 +1,6 @@
 /**
- * 🍱 TON AGENT NETWORK - PERMANENT MOBILE PRO LOGIC
- * Corrects: Mobile Orchestrator Chat Bar Persistence
+ * 🍱 TON AGENT NETWORK - OFFICIAL PRODUCTION LOGIC
+ * Fixes: Secure TonConnect Wallet Signing (Direct App Linkage)
  */
 
 let isWalletConnected = false;
@@ -14,10 +14,10 @@ const CORE_AGENTS = [
 
 let liveAgents = [...CORE_AGENTS]; 
 
-// 🟢 TONCONNECT - PRODUCTION MANIFEST
+// 🟢 TONCONNECT - OFFICIAL PRODUCTION READY
 const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
     manifestUrl: 'https://ton-agent-network.vercel.app/tonconnect-manifest.json',
-    buttonRootId: 'ton-connect'
+    buttonRootId: 'ton-connect' 
 });
 
 /**
@@ -103,27 +103,50 @@ function renderMarketFeed() {
     });
 }
 
+/**
+ * 💸 TON PAYMENTS (HIRING) - NATIVE DEEP-LINKING REPAIR
+ */
 function handleTransactionPrompt(agentId) {
+    // If not connected, open modal immediately
     if (!tonConnectUI.connected) {
-        alert("Connect TON Wallet first! 💎");
-        return tonConnectUI.openModal();
+        tonConnectUI.openModal();
+        return;
     }
     const agent = liveAgents.find(a => a.id === agentId);
     if (agent) processPayment(agent);
 }
 
 async function processPayment(agent) {
+    const amountInNano = (agent.price * 1000000000).toString();
+    
+    // 🔥 NEW: DEEP LINK REPAIR FOR MOBILE APP HANDLOVERS
     const transaction = {
-        validUntil: Math.floor(Date.now() / 1000) + 60,
-        messages: [{ address: agent.devWallet, amount: (agent.price * 1000000000).toString(), payload: "" }]
+        validUntil: Math.floor(Date.now() / 1000) + 360, // Extended window to 6 mins
+        messages: [{
+            address: agent.devWallet,
+            amount: amountInNano
+        }]
     };
+    
     try {
-        alert(`💎 PAYING ${agent.name}: Check your wallet for the signature.`);
+        if (typeof appendMessage === 'function') {
+            appendMessage(`💎 **PAYMENT INITIATED.** Opening your wallet app for signature...`, 'in');
+        }
+        
+        // 🔥 NATIVE SDK CALL: This will trigger the deep link on mobile to TonKeeper/Wallet
         await tonConnectUI.sendTransaction(transaction);
-        alert(`✅ SUCCESS! ${agent.name} hired.`);
-        appendMessage(`💸 Payment for **${agent.name}** confirmed.`, 'in');
+        
+        alert(`✅ SUCCESS! ${agent.name} hired. Solution unlocked.`);
+        if (typeof appendMessage === 'function') {
+            appendMessage(`💸 Success: **${agent.name}** hired! 🎉`, 'in');
+        }
     } catch (e) {
-        alert("❌ Payment Failed: " + (e.message || "User canceled."));
+        console.error("SDK Payment Error:", e);
+        const errorMsg = (e.message || "User canceled or wallet error.");
+        if (typeof appendMessage === 'function') {
+            appendMessage(`❌ **Payment Failed.** Reason: ${errorMsg}`, "in");
+        }
+        alert("❌ Payment Failed: " + errorMsg);
     }
 }
 
