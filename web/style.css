@@ -57,6 +57,16 @@ header { height: 54px; background: var(--tg-header-bg); padding: 0 16px; display
 }
 .bottom-bar input { flex: 1; background: transparent; border: none; font-size: 0.95rem; color: #fff; outline: none; }
 
+.chat-legal-footer {
+    font-size: 8px;
+    color: var(--tg-text-muted);
+    text-align: center;
+    padding: 6px 0;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    background: var(--tg-header-bg);
+}
+
 /* 🛠️ DEVELOPER PORTAL REDESIGN: PREMIUM NATIVE VIBE */
 .view-register-hero { padding: 20px 16px; background: linear-gradient(180deg, var(--tg-header-bg) 0%, var(--tg-bg) 100%); border-bottom: 1px solid var(--tg-border); }
 .view-register-hero h2 { font-size: 1.2rem; font-weight: 800; margin-bottom: 4px; }
