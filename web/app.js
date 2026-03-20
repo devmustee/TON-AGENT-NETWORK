@@ -1,5 +1,6 @@
 /**
- * 🍱 TON AGENT NETWORK - TACTICAL PRO LOGIC
+ * 🍱 TON AGENT NETWORK - OFFICIAL PRODUCTION LOGIC
+ * Fixes for: Hiring Payments (TonConnect) and Mobile Visibility (Send Bar)
  */
 
 let isWalletConnected = false;
@@ -13,7 +14,7 @@ const CORE_AGENTS = [
 
 let liveAgents = [...CORE_AGENTS]; 
 
-// 🟢 TONCONNECT
+// 🟢 TONCONNECT - PRODUCTION MANIFEST
 const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
     manifestUrl: 'https://ton-agent-network.vercel.app/tonconnect-manifest.json',
     buttonRootId: 'ton-connect'
@@ -24,6 +25,7 @@ const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
  */
 function toggleModal(id, force) {
     const el = document.getElementById(id);
+    if (!el) return;
     if (force !== undefined) el.style.display = force ? 'block' : 'none';
     else el.style.display = (el.style.display === 'block') ? 'none' : 'block';
 }
@@ -31,6 +33,7 @@ function toggleModal(id, force) {
 function toggleSendBtn() {
     const input = document.getElementById('taskInput');
     const icon = document.getElementById('sendBtnIcon');
+    if (!input || !icon) return;
     icon.style.color = input.value.trim() ? '#3390ec' : '#7e8c9a';
 }
 
@@ -46,7 +49,12 @@ function showView(viewName) {
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
     
-    document.getElementById('bottomChatBar').style.display = (viewName === 'chat') ? 'flex' : 'none';
+    // 🔥 FORCE VISIBILITY FOR MOBILE SEND BAR
+    const bottomBar = document.getElementById('bottomChatBar');
+    if (bottomBar) {
+        bottomBar.style.display = (viewName === 'chat') ? 'flex' : 'none';
+        bottomBar.style.visibility = (viewName === 'chat') ? 'visible' : 'hidden';
+    }
 
     if (viewName === 'market') {
         document.getElementById('tabMarket').classList.add('active');
@@ -79,6 +87,7 @@ async function fetchAgents() {
 
 function renderMarketFeed() {
     const feed = document.getElementById('agentMarketFeed');
+    if (!feed) return;
     feed.innerHTML = '';
     liveAgents.forEach(a => {
         const card = document.createElement('div');
@@ -95,36 +104,49 @@ function renderMarketFeed() {
                 <p>${a.bio || 'AI Specialisation for TON Network.'}</p>
                 <div class="card-meta">
                    <div class="card-stats">📈 ${a.stats || '100%'}</div>
-                   <button class="btn-unlock" onclick="handleTransactionPrompt('${a.id}')">Hire</button>
+                   <button class="btn-unlock" onclick="handleTransactionPrompt('${a.id}')" id="hire-${a.id}">Hire</button>
                 </div>
             </div>`;
         feed.appendChild(card);
     });
 }
 
+/**
+ * 💸 TON PAYMENTS (HIRING)
+ */
 function handleTransactionPrompt(agentId) {
-    if (!tonConnectUI.connected) return tonConnectUI.openModal();
+    if (!tonConnectUI.connected) {
+        alert("Connect your TON Wallet first! 💎");
+        return tonConnectUI.openModal();
+    }
     const agent = liveAgents.find(a => a.id === agentId);
     if (agent) processPayment(agent);
 }
 
 async function processPayment(agent) {
+    const amountInNano = (agent.price * 1000000000).toString();
     const transaction = {
         validUntil: Math.floor(Date.now() / 1000) + 60,
-        messages: [{ address: agent.devWallet, amount: (agent.price * 1000000000).toString(), payload: "" }]
+        messages: [{
+            address: agent.devWallet,
+            amount: amountInNano,
+            payload: "" 
+        }]
     };
+    
     try {
-        const walletName = tonConnectUI.wallet ? tonConnectUI.wallet.device.appName : "TON";
-        appendMessage(`💎 **Requesting signature...** Check your ${walletName} wallet.`, 'in');
+        const walletName = tonConnectUI.wallet ? tonConnectUI.wallet.device.appName : "Wallet";
+        alert(`💎 PAYING ${agent.name}: Confirm the ${agent.price} TON transfer in your ${walletName}.`);
         
-        const result = await tonConnectUI.sendTransaction(transaction);
-        console.log("Transaction Result:", result);
+        await tonConnectUI.sendTransaction(transaction);
+        alert(`✅ SUCCESS! ${agent.name} hired. Solution unlocked.`);
         
-        appendMessage(`💸 Payment for **${agent.name}** confirmed via TonConnect. Solution unlocked.`, 'in');
-    } catch (e) { 
-        console.error("TonConnect Error Detail:", e);
-        const errorMsg = e.message || "Wallet bridge error.";
-        appendMessage(`❌ **Payment Failed/Canceled.** ${errorMsg}`, "in");
+        if (typeof appendMessage === 'function') {
+            appendMessage(`💸 Payment for **${agent.name}** confirmed.`, 'in');
+        }
+    } catch (e) {
+        console.error("Payment Failed:", e);
+        alert("❌ Payment Failed: " + (e.message || "User canceled or insufficient funds."));
     }
 }
 
@@ -174,7 +196,7 @@ function renderAgentWidgetInChat() {
     liveAgents.forEach(a => {
         const row = document.createElement('div');
         row.className = 'agent-row';
-        row.onclick = () => processPayment(a);
+        row.onclick = () => processPayment(a); // Direct pay from chat
         row.innerHTML = `
             <img src="${a.avatar || 'assets/logo.png'}" class="agent-avatar-img">
             <span class="name">${a.name}</span>
@@ -182,30 +204,35 @@ function renderAgentWidgetInChat() {
             <i class="fa-solid fa-chevron-right" style="font-size:0.7rem; color:var(--tg-text-muted);"></i>`;
         widget.appendChild(row);
     });
-    document.querySelector('.chat-viewport').appendChild(widget);
-    document.querySelector('.chat-viewport').scrollTop = document.querySelector('.chat-viewport').scrollHeight;
+    const chatV = document.getElementById('chatList');
+    if (chatV) {
+        chatV.appendChild(widget);
+        chatV.scrollTop = chatV.scrollHeight;
+    }
 }
 
 function appendMessage(text, type = 'in') {
-    const chatViewport = document.getElementById('chatList');
+    const chatList = document.getElementById('chatList');
+    if (!chatList) return;
     const msg = document.createElement('div');
     msg.className = `bubble ${type}`;
     msg.innerHTML = `${text} <span class="time">${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>`;
-    chatViewport.appendChild(msg);
-    chatViewport.scrollTop = chatViewport.scrollHeight;
+    chatList.appendChild(msg);
+    chatList.scrollTop = chatList.scrollHeight;
 }
 
 window.onload = () => {
     showView('market');
     const reacts = ['👍', '🏙️', '🔥', '👏', '🎨', '🚀', '🙌', '💎', '📍', '💯', '✨', '⚡'];
     const grid = document.getElementById('emojiList');
-    reacts.forEach(r => {
-        const d = document.createElement('div');
-        d.className = 'agent-row';
-        d.style.justifyContent = 'center';
-        d.style.border = 'none';
-        d.innerHTML = r;
-        d.onclick = () => { appendMessage(r, 'out'); toggleModal('emojiModal', false); };
-        grid.appendChild(d);
-    });
+    if (grid) {
+        reacts.forEach(r => {
+            const d = document.createElement('div');
+            d.innerHTML = r;
+            d.style.padding = '10px';
+            d.style.fontSize = '1.5rem';
+            d.onclick = () => { appendMessage(r, 'out'); toggleModal('emojiModal', false); };
+            grid.appendChild(d);
+        });
+    }
 };
