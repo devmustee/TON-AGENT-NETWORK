@@ -1,6 +1,6 @@
 /**
- * 🍱 TON AGENT NETWORK - OFFICIAL PRODUCTION LOGIC
- * Fixes: Premium Agent Card Rendering in Proxy Chat
+ * 🍱 TON AGENT NETWORK - TACTICAL PERFORMANCE LOGIC
+ * Optimized for Mobile Responsiveness & DOM Efficiency
  */
 
 let isWalletConnected = false;
@@ -21,7 +21,7 @@ const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
 });
 
 /**
- * 🛠️ UI HELPERS
+ * 🛠️ PERFORMANCE HELPERS
  */
 function toggleModal(id, force) {
     const el = document.getElementById(id);
@@ -46,22 +46,25 @@ function selectAttach(type) {
  * 🛠️ VIEW MANAGEMENT
  */
 function showView(viewName) {
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    const tabs = ['tabMarket', 'tabChat', 'tabRegister'];
+    const views = ['viewMarket', 'viewChat', 'viewRegister'];
     
-    if (viewName === 'market') {
-        document.getElementById('tabMarket').classList.add('active');
-        document.getElementById('viewMarket').classList.add('active');
-        fetchAgents();
-    } else if (viewName === 'chat') {
-        document.getElementById('tabChat').classList.add('active');
-        document.getElementById('viewChat').classList.add('active');
-    } else {
-        document.getElementById('tabRegister').classList.add('active');
-        document.getElementById('viewRegister').classList.add('active');
-    }
+    // Batch DOM updates
+    tabs.forEach(t => document.getElementById(t).classList.remove('active'));
+    views.forEach(v => document.getElementById(v).classList.remove('active'));
+    
+    const activeTabId = tabs.find(t => t.toLowerCase().includes(viewName));
+    const activeViewId = views.find(v => v.toLowerCase().includes(viewName));
+    
+    if (activeTabId) document.getElementById(activeTabId).classList.add('active');
+    if (activeViewId) document.getElementById(activeViewId).classList.add('active');
+
+    if (viewName === 'market') fetchAgents();
 }
 
+/**
+ * 🛰️ AGENT DATA PIPELINE (LAZY LOAD LOGIC)
+ */
 async function fetchAgents() {
     try {
         const res = await fetch('/api/agents');
@@ -81,36 +84,37 @@ async function fetchAgents() {
 function renderMarketFeed() {
     const feed = document.getElementById('agentMarketFeed');
     if (!feed) return;
-    feed.innerHTML = '';
+    feed.innerHTML = ''; // Fast Clear
+    
+    // Document Fragment for high performance Batch Render
+    const fragment = document.createDocumentFragment();
     liveAgents.forEach(a => {
         const card = document.createElement('div');
         card.className = 'market-card';
         card.innerHTML = `
             <div class="card-img-container">
-                <img src="${a.avatar || 'assets/logo.png'}" class="card-img" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3662/3662817.png'">
+                <img src="${a.avatar || 'assets/logo.png'}" class="card-img" loading="lazy" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3662/3662817.png'">
             </div>
             <div class="card-info">
                 <div class="card-name-row">
                     <h3>${a.name}</h3>
                     <div class="card-price">${a.price} TON</div>
                 </div>
-                <p>${a.bio || 'AI Specialisation for TON Network.'}</p>
+                <p>${a.bio ? a.bio.substring(0, 100) : 'AI Specialist'}...</p>
                 <div class="card-meta">
                    <button class="btn-unlock" onclick="handleTransactionPrompt('${a.id}')">Hire</button>
                 </div>
             </div>`;
-        feed.appendChild(card);
+        fragment.appendChild(card);
     });
+    feed.appendChild(fragment);
 }
 
 /**
  * 💸 TON PAYMENTS
  */
 function handleTransactionPrompt(agentId) {
-    if (!tonConnectUI.connected) {
-        tonConnectUI.openModal();
-        return;
-    }
+    if (!tonConnectUI.connected) return tonConnectUI.openModal();
     const agent = liveAgents.find(a => a.id === agentId);
     if (agent) processPayment(agent);
 }
@@ -119,40 +123,34 @@ async function processPayment(agent) {
     const amountInNano = (agent.price * 1000000000).toString();
     const transaction = {
         validUntil: Math.floor(Date.now() / 1000) + 360,
-        messages: [{
-            address: agent.devWallet,
-            amount: amountInNano
-        }]
+        messages: [{ address: agent.devWallet, amount: amountInNano }]
     };
-    
     try {
-        appendMessage(`💎 **PAYMENT INITIATED.** Check your wallet app for signature...`, 'in');
+        appendMessage(`💎 **Ready.** Open wallet to sign ${agent.price} TON.`, 'in');
         await tonConnectUI.sendTransaction(transaction);
-        alert(`✅ SUCCESS! ${agent.name} hired.`);
-        appendMessage(`💸 Success: **${agent.name}** hired! 🎉`, 'in');
+        appendMessage(`✅ **Success.** ${agent.name} hired! 🎉`, 'in');
     } catch (e) {
-        console.error("Payment Error:", e);
-        const errorMsg = (e.message || "User canceled.");
-        appendMessage(`❌ **Payment Failed.** ${errorMsg}`, "in");
-        alert("❌ Payment Failed: " + errorMsg);
+        appendMessage(`❌ **Payment Failed.** User canceled or wallet error.`, "in");
     }
 }
 
 /**
- * 🛰️ ORCHESTRATOR LOGIC (PREMIUM CARDS)
+ * 💬 ORCHESTRATOR
  */
 function sendMessage() {
-    if (!tonConnectUI.connected) return tonConnectUI.openModal();
     const input = document.getElementById('taskInput');
     const text = input.value.trim();
     if (!text) return;
+    if (!tonConnectUI.connected) return tonConnectUI.openModal();
+
     appendMessage(text, 'out');
     input.value = '';
     toggleSendBtn(); 
+    
     setTimeout(() => {
-        appendMessage("🌐 Searching decentralized Network for specialists...");
+        appendMessage("🌐 Searching decentralized Network for matches...", 'in');
         setTimeout(() => {
-            appendMessage("✅ **Found direct matches for your task:**", 'in');
+            appendMessage("✅ **Direct matches found for tasking:**", 'in');
             renderAgentWidgetInChat();
         }, 1200);
     }, 600);
@@ -162,6 +160,7 @@ function renderAgentWidgetInChat() {
     const container = document.getElementById('chatList');
     if (!container) return;
 
+    const widgetFragment = document.createDocumentFragment();
     const widget = document.createElement('div');
     widget.className = 'agent-widget';
 
@@ -170,7 +169,7 @@ function renderAgentWidgetInChat() {
         card.className = 'agent-row';
         card.onclick = () => processPayment(a);
         card.innerHTML = `
-            <img src="${a.avatar || 'assets/logo.png'}" class="agent-avatar-img" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3662/3662817.png'">
+            <img src="${a.avatar || 'assets/logo.png'}" class="agent-avatar-img" loading="lazy">
             <div class="agent-meta-brief">
                 <span class="name">${a.name}</span>
                 <span class="hint">${a.bio.substring(0, 40)}...</span>
@@ -196,5 +195,14 @@ function appendMessage(text, type = 'in') {
     chatList.appendChild(msg);
     chatList.scrollTop = chatList.scrollHeight;
 }
+
+// Global Resize Listener for Layout Resiliency
+window.addEventListener('resize', () => {
+    const activeView = document.querySelector('.view.active');
+    if (activeView && activeView.id === 'viewChat') {
+        const list = document.getElementById('chatList');
+        if (list) list.scrollTop = list.scrollHeight;
+    }
+});
 
 window.onload = () => showView('market');
