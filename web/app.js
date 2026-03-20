@@ -1,6 +1,6 @@
 /**
  * 🍱 TON AGENT NETWORK - OFFICIAL PRODUCTION LOGIC
- * Fixes: Secure TonConnect Wallet Signing (Direct App Linkage)
+ * Fixes: Premium Agent Card Rendering in Proxy Chat
  */
 
 let isWalletConnected = false;
@@ -104,10 +104,9 @@ function renderMarketFeed() {
 }
 
 /**
- * 💸 TON PAYMENTS (HIRING) - NATIVE DEEP-LINKING REPAIR
+ * 💸 TON PAYMENTS
  */
 function handleTransactionPrompt(agentId) {
-    // If not connected, open modal immediately
     if (!tonConnectUI.connected) {
         tonConnectUI.openModal();
         return;
@@ -118,10 +117,8 @@ function handleTransactionPrompt(agentId) {
 
 async function processPayment(agent) {
     const amountInNano = (agent.price * 1000000000).toString();
-    
-    // 🔥 NEW: DEEP LINK REPAIR FOR MOBILE APP HANDLOVERS
     const transaction = {
-        validUntil: Math.floor(Date.now() / 1000) + 360, // Extended window to 6 mins
+        validUntil: Math.floor(Date.now() / 1000) + 360,
         messages: [{
             address: agent.devWallet,
             amount: amountInNano
@@ -129,27 +126,21 @@ async function processPayment(agent) {
     };
     
     try {
-        if (typeof appendMessage === 'function') {
-            appendMessage(`💎 **PAYMENT INITIATED.** Opening your wallet app for signature...`, 'in');
-        }
-        
-        // 🔥 NATIVE SDK CALL: This will trigger the deep link on mobile to TonKeeper/Wallet
+        appendMessage(`💎 **PAYMENT INITIATED.** Check your wallet app for signature...`, 'in');
         await tonConnectUI.sendTransaction(transaction);
-        
-        alert(`✅ SUCCESS! ${agent.name} hired. Solution unlocked.`);
-        if (typeof appendMessage === 'function') {
-            appendMessage(`💸 Success: **${agent.name}** hired! 🎉`, 'in');
-        }
+        alert(`✅ SUCCESS! ${agent.name} hired.`);
+        appendMessage(`💸 Success: **${agent.name}** hired! 🎉`, 'in');
     } catch (e) {
-        console.error("SDK Payment Error:", e);
-        const errorMsg = (e.message || "User canceled or wallet error.");
-        if (typeof appendMessage === 'function') {
-            appendMessage(`❌ **Payment Failed.** Reason: ${errorMsg}`, "in");
-        }
+        console.error("Payment Error:", e);
+        const errorMsg = (e.message || "User canceled.");
+        appendMessage(`❌ **Payment Failed.** ${errorMsg}`, "in");
         alert("❌ Payment Failed: " + errorMsg);
     }
 }
 
+/**
+ * 🛰️ ORCHESTRATOR LOGIC (PREMIUM CARDS)
+ */
 function sendMessage() {
     if (!tonConnectUI.connected) return tonConnectUI.openModal();
     const input = document.getElementById('taskInput');
@@ -159,33 +150,41 @@ function sendMessage() {
     input.value = '';
     toggleSendBtn(); 
     setTimeout(() => {
-        appendMessage("🌐 Searching Network...");
+        appendMessage("🌐 Searching decentralized Network for specialists...");
         setTimeout(() => {
-            appendMessage("✅ Found matches:");
+            appendMessage("✅ **Found direct matches for your task:**", 'in');
             renderAgentWidgetInChat();
-        }, 1000);
-    }, 500);
+        }, 1200);
+    }, 600);
 }
 
 function renderAgentWidgetInChat() {
+    const container = document.getElementById('chatList');
+    if (!container) return;
+
     const widget = document.createElement('div');
     widget.className = 'agent-widget';
+
     liveAgents.forEach(a => {
-        const row = document.createElement('div');
-        row.className = 'agent-row';
-        row.onclick = () => processPayment(a);
-        row.innerHTML = `
-            <img src="${a.avatar || 'assets/logo.png'}" class="agent-avatar-img">
-            <span class="name">${a.name}</span>
-            <span class="price">${a.price} TON</span>
-            <i class="fa-solid fa-chevron-right" style="font-size:0.7rem;"></i>`;
-        widget.appendChild(row);
+        const card = document.createElement('div');
+        card.className = 'agent-row';
+        card.onclick = () => processPayment(a);
+        card.innerHTML = `
+            <img src="${a.avatar || 'assets/logo.png'}" class="agent-avatar-img" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3662/3662817.png'">
+            <div class="agent-meta-brief">
+                <span class="name">${a.name}</span>
+                <span class="hint">${a.bio.substring(0, 40)}...</span>
+            </div>
+            <div class="agent-cta-price">
+                <span class="price">${a.price} TON</span>
+                <button class="btn-hire">HIRE</button>
+            </div>
+        `;
+        widget.appendChild(card);
     });
-    const chatList = document.getElementById('chatList');
-    if (chatList) {
-        chatList.appendChild(widget);
-        chatList.scrollTop = chatList.scrollHeight;
-    }
+
+    container.appendChild(widget);
+    container.scrollTop = container.scrollHeight;
 }
 
 function appendMessage(text, type = 'in') {
