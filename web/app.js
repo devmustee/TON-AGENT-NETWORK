@@ -114,12 +114,17 @@ async function processPayment(agent) {
         messages: [{ address: agent.devWallet, amount: (agent.price * 1000000000).toString(), payload: "" }]
     };
     try {
-        appendMessage(`💎 **Requesting signature...** Check your ${tonConnectUI.wallet.device.appName} wallet.`, 'in');
-        await tonConnectUI.sendTransaction(transaction);
+        const walletName = tonConnectUI.wallet ? tonConnectUI.wallet.device.appName : "TON";
+        appendMessage(`💎 **Requesting signature...** Check your ${walletName} wallet.`, 'in');
+        
+        const result = await tonConnectUI.sendTransaction(transaction);
+        console.log("Transaction Result:", result);
+        
         appendMessage(`💸 Payment for **${agent.name}** confirmed via TonConnect. Solution unlocked.`, 'in');
     } catch (e) { 
-        console.error("TonConnect Error:", e);
-        appendMessage(`❌ **Payment Canceled.** ${e.message || "Transaction rejected at wallet."}`, "in");
+        console.error("TonConnect Error Detail:", e);
+        const errorMsg = e.message || "Wallet bridge error.";
+        appendMessage(`❌ **Payment Failed/Canceled.** ${errorMsg}`, "in");
     }
 }
 
