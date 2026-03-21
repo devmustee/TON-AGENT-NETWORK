@@ -10,7 +10,7 @@
 </head>
 <body>
     <div class="mini-app-frame">
-        <!-- Header -->
+        <!-- 🧊 CRYSTAL HEADER -->
         <header>
             <div class="header-brand">
                 <div class="header-avatar">
@@ -24,7 +24,7 @@
             <div id="ton-connect"></div>
         </header>
 
-        <!-- Tabs -->
+        <!-- 🪜 PILL NAVIGATION -->
         <nav class="tab-container">
             <div class="tab active" id="tabMarket" onclick="showView('market')"><i class="fa-solid fa-shop"></i> Market</div>
             <div class="tab" id="tabChat" onclick="showView('chat')"><i class="fa-solid fa-comment"></i> Proxy</div>
@@ -37,21 +37,42 @@
                 <div class="market-grid" id="agentMarketFeed"></div>
             </main>
 
-            <!-- 💬 ORCHESTRATOR -->
+            <!-- 💬 ORCHESTRATOR PROXY (DOCK ARCHITECTURE) -->
             <main class="view" id="viewChat">
                 <div class="chat-container">
                     <div class="chat-viewport" id="chatList">
                         <div class="bubble in">🚀 **Orchestrator Proxy Active.** Send a task for parallel distribution across the Network.</div>
                     </div>
+
+                    <!-- 📎 ATTACHMENT MODAL (NESTED INVIEW FOR PERSISTENT UI) -->
+                    <div class="modal" id="attachModal">
+                        <div class="modal-header"><span>SHARE ASSET</span><i class="fa-solid fa-xmark" onclick="toggleModal('attachModal', false)"></i></div>
+                        <div class="emoji-grid">
+                            <div class="agent-row-attach" onclick="selectAttach('PHOTO')">
+                                <i class="fa-solid fa-image" style="color: #007aff; font-size: 1.5rem;"></i>
+                                <span style="font-size: 0.7rem;">PHOTO</span>
+                            </div>
+                            <div class="agent-row-attach" onclick="selectAttach('FILE')">
+                                <i class="fa-solid fa-file" style="color: #007aff; font-size: 1.5rem;"></i>
+                                <span style="font-size: 0.7rem;">FILE</span>
+                            </div>
+                            <div class="agent-row-attach" onclick="selectAttach('AUDIO')">
+                                <i class="fa-solid fa-music" style="color: #007aff; font-size: 1.5rem;"></i>
+                                <span style="font-size: 0.7rem;">AUDIO</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 🚀 THE ABSOLUTE PINNED BOTTOM BAR -->
                     <footer class="bottom-bar">
                         <i class="fa-solid fa-paperclip" onclick="toggleModal('attachModal')"></i>
                         <input type="text" placeholder="Send prompt..." id="taskInput" oninput="toggleSendBtn()" onkeypress="if(event.key==='Enter')sendMessage()">
-                        <i class="fa-solid fa-circle-arrow-up" id="sendBtnIcon" onclick="sendMessage()" style="font-size: 2rem; color: #7e8c9a;"></i>
+                        <i class="fa-solid fa-circle-arrow-up" id="sendBtnIcon" onclick="sendMessage()" style="font-size: 1.8rem; color: #7e8c9a;"></i>
                     </footer>
                 </div>
             </main>
 
-            <!-- 🛠️ DEVELOPER PORTAL PREMIERE -->
+            <!-- 🛠️ DEVELOPER DASHBOARD -->
             <main class="view" id="viewRegister">
                 <div class="view-register-hero">
                     <i class="fa-solid fa-terminal"></i>
@@ -59,63 +80,17 @@
                     <p>Integrate your AI models and monetize every inference within the TON ecosystem.</p>
                 </div>
 
-                <div class="dev-docs-grid">
-                    <div class="dev-docs-card">
-                        <i class="fa-solid fa-shield-halved"></i>
-                        <div class="dev-docs-info">
-                            <h4>Webhook Auth</h4>
-                            <p>Verify requests with your <code>X-TON-AGENT-ID</code> signature header.</p>
-                        </div>
-                    </div>
-                    <div class="dev-docs-card">
-                        <i class="fa-solid fa-coins"></i>
-                        <div class="dev-docs-info">
-                            <h4>Instant Settlement</h4>
-                            <p>Funds travel directly from User to Architect in real-time mainnet transactions.</p>
-                        </div>
-                    </div>
-                </div>
-
                 <div class="section-label">Identity & Payouts</div>
                 <div class="list-group">
-                    <div class="list-item">
-                        <label>Agent Name</label>
-                        <input type="text" id="regName" placeholder="e.g. CodeAnalyst Pro">
-                    </div>
-                    <div class="list-item">
-                        <label>Branding Avatar URL</label>
-                        <input type="url" id="regAvatar" placeholder="https://cdn.brand.com/logo.png">
-                    </div>
-                    <div class="list-item">
-                        <label>Logic Description</label>
-                        <textarea id="regBio" placeholder="Describe specializing capabilities..." rows="2"></textarea>
-                    </div>
-                    <div class="list-item">
-                        <label>Webhook Integration Endpoint</label>
-                        <input type="url" id="regUrl" placeholder="https://api.yourdomain.com/v1/agent">
-                    </div>
-                    <div class="list-item">
-                        <label>TON Settlement Address</label>
-                        <input type="text" id="regWallet" placeholder="UQ...2q6Zf99">
-                    </div>
-                    <div class="list-item">
-                        <label>Inference Price (TON)</label>
-                        <input type="number" id="regPrice" step="0.1" placeholder="0.2">
-                    </div>
+                    <div class="list-item"><label>Agent Name</label><input type="text" id="regName" placeholder="e.g. CodeAnalyst Pro"></div>
+                    <div class="list-item"><label>Avatar Brand URL</label><input type="url" id="regAvatar" placeholder="https://brand.com/logo.png"></div>
+                    <div class="list-item"><label>Webhook Integration</label><input type="url" id="regUrl" placeholder="https://api.yourdomain.com"></div>
+                    <div class="list-item"><label>Settlement Wallet</label><input type="text" id="regWallet" placeholder="UQ...2q6Zf9N"></div>
+                    <div class="list-item"><label>Inference Price (TON)</label><input type="number" id="regPrice" step="0.1" placeholder="0.2"></div>
                 </div>
 
                 <button class="btn-primary" onclick="registerNewAgent()" style="width: calc(100% - 32px);">Deploy AI Agent to Network</button>
             </main>
-        </div>
-
-        <!-- SHARED MODALS -->
-        <div class="modal" id="attachModal">
-            <div class="modal-header"><span>SHARE</span><i class="fa-solid fa-xmark" onclick="toggleModal('attachModal', false)"></i></div>
-            <div class="emoji-grid" style="grid-template-columns: repeat(3, 1fr);">
-                <div class="agent-row-attach" onclick="selectAttach('PHOTO')"><i class="fa-solid fa-image" style="color: #3390ec; font-size: 1.5rem;"></i><span style="font-size: 0.7rem;">PHOTO</span></div>
-                <div class="agent-row-attach" onclick="selectAttach('FILE')"><i class="fa-solid fa-file" style="color: #3390ec; font-size: 1.5rem;"></i><span style="font-size: 0.7rem;">FILE</span></div>
-                <div class="agent-row-attach" onclick="selectAttach('AUDIO')"><i class="fa-solid fa-music" style="color: #3390ec; font-size: 1.5rem;"></i><span style="font-size: 0.7rem;">AUDIO</span></div>
-            </div>
         </div>
     </div>
     <script src="app.js"></script>
