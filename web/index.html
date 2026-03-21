@@ -48,63 +48,63 @@
                         <input type="text" placeholder="Send prompt..." id="taskInput" oninput="toggleSendBtn()" onkeypress="if(event.key==='Enter')sendMessage()">
                         <i class="fa-solid fa-circle-arrow-up" id="sendBtnIcon" onclick="sendMessage()" style="font-size: 2rem; color: #7e8c9a;"></i>
                     </footer>
-                    <div class="chat-legal-footer">TON AGENT NETWORK 2026</div>
                 </div>
             </main>
 
-            <!-- 🛠️ DEVELOPER PORTAL REDESIGN -->
+            <!-- 🛠️ DEVELOPER PORTAL PREMIERE -->
             <main class="view" id="viewRegister">
                 <div class="view-register-hero">
-                    <h2>Developer Integration</h2>
-                    <p>Integrate your AI models and monetize every inference across the TON Network.</p>
+                    <i class="fa-solid fa-terminal"></i>
+                    <h2>Developer Console</h2>
+                    <p>Integrate your AI models and monetize every inference within the TON ecosystem.</p>
                 </div>
 
                 <div class="dev-docs-grid">
                     <div class="dev-docs-card">
                         <i class="fa-solid fa-shield-halved"></i>
                         <div class="dev-docs-info">
-                            <h4>Secure Signature</h4>
-                            <p>Authentication via <code>X-TON-AGENT-KEY</code> header for every task.</p>
+                            <h4>Webhook Auth</h4>
+                            <p>Verify requests with your <code>X-TON-AGENT-ID</code> signature header.</p>
                         </div>
                     </div>
                     <div class="dev-docs-card">
-                        <i class="fa-solid fa-bolt"></i>
+                        <i class="fa-solid fa-coins"></i>
                         <div class="dev-docs-info">
-                            <h4>High-Speed Payout</h4>
-                            <p>Confirm transactions on Mainnet. 95% goes directly to you.</p>
+                            <h4>Instant Settlement</h4>
+                            <p>Funds travel directly from User to Architect in real-time mainnet transactions.</p>
                         </div>
                     </div>
                 </div>
 
-                <div class="section-label">Agent Registration</div>
+                <div class="section-label">Identity & Payouts</div>
                 <div class="list-group">
                     <div class="list-item">
                         <label>Agent Name</label>
                         <input type="text" id="regName" placeholder="e.g. CodeAnalyst Pro">
                     </div>
                     <div class="list-item">
-                        <label>Expertise Avatar URL</label>
-                        <input type="url" id="regAvatar" placeholder="https://brand.com/logo.png">
+                        <label>Branding Avatar URL</label>
+                        <input type="url" id="regAvatar" placeholder="https://cdn.brand.com/logo.png">
                     </div>
                     <div class="list-item">
-                        <label>System Description</label>
+                        <label>Logic Description</label>
                         <textarea id="regBio" placeholder="Describe specializing capabilities..." rows="2"></textarea>
                     </div>
                     <div class="list-item">
-                        <label>Integration URL (Webhook)</label>
+                        <label>Webhook Integration Endpoint</label>
                         <input type="url" id="regUrl" placeholder="https://api.yourdomain.com/v1/agent">
                     </div>
                     <div class="list-item">
-                        <label>Payout Wallet (TON)</label>
-                        <input type="text" id="regWallet" placeholder="UQ...2q6Zf9N">
+                        <label>TON Settlement Address</label>
+                        <input type="text" id="regWallet" placeholder="UQ...2q6Zf99">
                     </div>
                     <div class="list-item">
-                        <label>Price (TON)</label>
+                        <label>Inference Price (TON)</label>
                         <input type="number" id="regPrice" step="0.1" placeholder="0.2">
                     </div>
                 </div>
 
-                <button class="btn-primary" onclick="registerNewAgent()" style="width: calc(100% - 32px);">Deploy AI Agent to Market</button>
+                <button class="btn-primary" onclick="registerNewAgent()" style="width: calc(100% - 32px);">Deploy AI Agent to Network</button>
             </main>
         </div>
 
@@ -112,9 +112,9 @@
         <div class="modal" id="attachModal">
             <div class="modal-header"><span>SHARE</span><i class="fa-solid fa-xmark" onclick="toggleModal('attachModal', false)"></i></div>
             <div class="emoji-grid" style="grid-template-columns: repeat(3, 1fr);">
-                <div class="agent-row" style="flex-direction: column; align-items: center; border: none;" onclick="selectAttach('PHOTO')"><i class="fa-solid fa-image" style="color: #3390ec; font-size: 1.5rem;"></i><span style="font-size: 0.7rem;">PHOTO</span></div>
-                <div class="agent-row" style="flex-direction: column; align-items: center; border: none;" onclick="selectAttach('FILE')"><i class="fa-solid fa-file" style="color: #3390ec; font-size: 1.5rem;"></i><span style="font-size: 0.7rem;">FILE</span></div>
-                <div class="agent-row" style="flex-direction: column; align-items: center; border: none;" onclick="selectAttach('AUDIO')"><i class="fa-solid fa-music" style="color: #3390ec; font-size: 1.5rem;"></i><span style="font-size: 0.7rem;">AUDIO</span></div>
+                <div class="agent-row-attach" onclick="selectAttach('PHOTO')"><i class="fa-solid fa-image" style="color: #3390ec; font-size: 1.5rem;"></i><span style="font-size: 0.7rem;">PHOTO</span></div>
+                <div class="agent-row-attach" onclick="selectAttach('FILE')"><i class="fa-solid fa-file" style="color: #3390ec; font-size: 1.5rem;"></i><span style="font-size: 0.7rem;">FILE</span></div>
+                <div class="agent-row-attach" onclick="selectAttach('AUDIO')"><i class="fa-solid fa-music" style="color: #3390ec; font-size: 1.5rem;"></i><span style="font-size: 0.7rem;">AUDIO</span></div>
             </div>
         </div>
     </div>
