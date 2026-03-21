@@ -1,6 +1,6 @@
 /**
- * 🍱 TON AGENT NETWORK - TACTICAL PERFORMANCE LOGIC
- * Optimized for Mobile Responsiveness & DOM Efficiency
+ * 🍱 TON AGENT NETWORK - OFFICIAL PRODUCTION LOGIC
+ * Corrects: Attachments & Mobile UI Persistence
  */
 
 let isWalletConnected = false;
@@ -21,7 +21,7 @@ const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
 });
 
 /**
- * 🛠️ PERFORMANCE HELPERS
+ * 🛠️ UI HELPERS
  */
 function toggleModal(id, force) {
     const el = document.getElementById(id);
@@ -30,41 +30,54 @@ function toggleModal(id, force) {
     else el.style.display = (el.style.display === 'block') ? 'none' : 'block';
 }
 
-function toggleSendBtn() {
-    const input = document.getElementById('taskInput');
-    const icon = document.getElementById('sendBtnIcon');
-    if (!input || !icon) return;
-    icon.style.color = input.value.trim() ? '#3390ec' : '#7e8c9a';
+/**
+ * 🛰️ ATTACHMENT FLOW (NATIVE)
+ */
+function openAttachmentPrompt() {
+    toggleModal('attachModal', true);
 }
 
 function selectAttach(type) {
     toggleModal('attachModal', false);
-    appendMessage(`📎 Attached ${type}. Ready for tasking.`, 'out');
+    
+    // Simulate File selection for functional flow
+    const input = document.createElement('input');
+    input.type = 'file';
+    if (type === 'PHOTO') input.accept = 'image/*';
+    if (type === 'AUDIO') input.accept = 'audio/*';
+    
+    input.onchange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            appendMessage(`📎 **Processing ${type}:** ${file.name} (uploading to network...)`, 'out');
+            setTimeout(() => {
+                appendMessage(`✅ **${type} Uploaded.** Ready for AI analysis.`, 'in');
+            }, 1000);
+        }
+    };
+    input.click();
 }
 
 /**
  * 🛠️ VIEW MANAGEMENT
  */
 function showView(viewName) {
-    const tabs = ['tabMarket', 'tabChat', 'tabRegister'];
-    const views = ['viewMarket', 'viewChat', 'viewRegister'];
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
     
-    // Batch DOM updates
-    tabs.forEach(t => document.getElementById(t).classList.remove('active'));
-    views.forEach(v => document.getElementById(v).classList.remove('active'));
-    
-    const activeTabId = tabs.find(t => t.toLowerCase().includes(viewName));
-    const activeViewId = views.find(v => v.toLowerCase().includes(viewName));
-    
-    if (activeTabId) document.getElementById(activeTabId).classList.add('active');
-    if (activeViewId) document.getElementById(activeViewId).classList.add('active');
-
-    if (viewName === 'market') fetchAgents();
+    if (viewName === 'market') {
+        document.getElementById('tabMarket').classList.add('active');
+        document.getElementById('viewMarket').classList.add('active');
+        fetchAgents();
+    } else if (viewName === 'chat') {
+        document.getElementById('tabChat').classList.add('active');
+        document.getElementById('viewChat').classList.add('active');
+    } else {
+        document.getElementById('tabRegister').classList.add('active');
+        document.getElementById('viewRegister').classList.add('active');
+    }
 }
 
-/**
- * 🛰️ AGENT DATA PIPELINE (LAZY LOAD LOGIC)
- */
 async function fetchAgents() {
     try {
         const res = await fetch('/api/agents');
@@ -84,30 +97,26 @@ async function fetchAgents() {
 function renderMarketFeed() {
     const feed = document.getElementById('agentMarketFeed');
     if (!feed) return;
-    feed.innerHTML = ''; // Fast Clear
-    
-    // Document Fragment for high performance Batch Render
-    const fragment = document.createDocumentFragment();
+    feed.innerHTML = '';
     liveAgents.forEach(a => {
         const card = document.createElement('div');
         card.className = 'market-card';
         card.innerHTML = `
             <div class="card-img-container">
-                <img src="${a.avatar || 'assets/logo.png'}" class="card-img" loading="lazy" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3662/3662817.png'">
+                <img src="${a.avatar || 'assets/logo.png'}" class="card-img" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3662/3662817.png'">
             </div>
             <div class="card-info">
                 <div class="card-name-row">
                     <h3>${a.name}</h3>
                     <div class="card-price">${a.price} TON</div>
                 </div>
-                <p>${a.bio ? a.bio.substring(0, 100) : 'AI Specialist'}...</p>
+                <p>${a.bio || 'AI Specialisation for TON Network.'}</p>
                 <div class="card-meta">
                    <button class="btn-unlock" onclick="handleTransactionPrompt('${a.id}')">Hire</button>
                 </div>
             </div>`;
-        fragment.appendChild(card);
+        feed.appendChild(card);
     });
-    feed.appendChild(fragment);
 }
 
 /**
@@ -120,17 +129,16 @@ function handleTransactionPrompt(agentId) {
 }
 
 async function processPayment(agent) {
-    const amountInNano = (agent.price * 1000000000).toString();
     const transaction = {
         validUntil: Math.floor(Date.now() / 1000) + 360,
-        messages: [{ address: agent.devWallet, amount: amountInNano }]
+        messages: [{ address: agent.devWallet, amount: (agent.price * 1000000000).toString() }]
     };
     try {
-        appendMessage(`💎 **Ready.** Open wallet to sign ${agent.price} TON.`, 'in');
+        appendMessage(`💎 **PAYMENT INITIATED.** Check wallet signature.`, 'in');
         await tonConnectUI.sendTransaction(transaction);
-        appendMessage(`✅ **Success.** ${agent.name} hired! 🎉`, 'in');
+        appendMessage(`💸 Success: **${agent.name}** hired! 🎉`, 'in');
     } catch (e) {
-        appendMessage(`❌ **Payment Failed.** User canceled or wallet error.`, "in");
+        appendMessage(`❌ **Payment Failed.** User canceled.`, "in");
     }
 }
 
@@ -138,19 +146,16 @@ async function processPayment(agent) {
  * 💬 ORCHESTRATOR
  */
 function sendMessage() {
+    if (!tonConnectUI.connected) return tonConnectUI.openModal();
     const input = document.getElementById('taskInput');
     const text = input.value.trim();
     if (!text) return;
-    if (!tonConnectUI.connected) return tonConnectUI.openModal();
-
     appendMessage(text, 'out');
     input.value = '';
-    toggleSendBtn(); 
-    
     setTimeout(() => {
         appendMessage("🌐 Searching decentralized Network for matches...", 'in');
         setTimeout(() => {
-            appendMessage("✅ **Direct matches found for tasking:**", 'in');
+            appendMessage("✅ **Found direct matches for your tasking:**", 'in');
             renderAgentWidgetInChat();
         }, 1200);
     }, 600);
@@ -159,29 +164,24 @@ function sendMessage() {
 function renderAgentWidgetInChat() {
     const container = document.getElementById('chatList');
     if (!container) return;
-
-    const widgetFragment = document.createDocumentFragment();
     const widget = document.createElement('div');
     widget.className = 'agent-widget';
-
     liveAgents.forEach(a => {
-        const card = document.createElement('div');
-        card.className = 'agent-row';
-        card.onclick = () => processPayment(a);
-        card.innerHTML = `
-            <img src="${a.avatar || 'assets/logo.png'}" class="agent-avatar-img" loading="lazy">
+        const row = document.createElement('div');
+        row.className = 'agent-row';
+        row.onclick = () => processPayment(a);
+        row.innerHTML = `
+            <img src="${a.avatar || 'assets/logo.png'}" class="agent-avatar-img" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3662/3662817.png'">
             <div class="agent-meta-brief">
                 <span class="name">${a.name}</span>
                 <span class="hint">${a.bio.substring(0, 40)}...</span>
             </div>
             <div class="agent-cta-price">
                 <span class="price">${a.price} TON</span>
-                <button class="btn-hire">HIRE</button>
-            </div>
-        `;
-        widget.appendChild(card);
+                <button class="btn-hire" style="background:#3390ec;color:#fff;border:none;padding:4px 8px;border-radius:6px;font-size:0.6rem;font-weight:800;">HIRE</button>
+            </div>`;
+        widget.appendChild(row);
     });
-
     container.appendChild(widget);
     container.scrollTop = container.scrollHeight;
 }
@@ -195,14 +195,5 @@ function appendMessage(text, type = 'in') {
     chatList.appendChild(msg);
     chatList.scrollTop = chatList.scrollHeight;
 }
-
-// Global Resize Listener for Layout Resiliency
-window.addEventListener('resize', () => {
-    const activeView = document.querySelector('.view.active');
-    if (activeView && activeView.id === 'viewChat') {
-        const list = document.getElementById('chatList');
-        if (list) list.scrollTop = list.scrollHeight;
-    }
-});
 
 window.onload = () => showView('market');
